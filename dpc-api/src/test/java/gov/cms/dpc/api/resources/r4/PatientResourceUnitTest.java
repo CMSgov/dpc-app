@@ -6,7 +6,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.attribution.client.search.PatientSearch;

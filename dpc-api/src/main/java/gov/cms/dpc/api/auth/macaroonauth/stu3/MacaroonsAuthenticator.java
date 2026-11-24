@@ -12,6 +12,7 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,11 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         PathAuthorizer pathAuthorizer = credentials.getPathAuthorizer();
 
         // If we don't have a path authorizer, just return the principal
-        final OrganizationPrincipal principal = new OrganizationPrincipal(credentials.getOrganization());
+        final Organization organization = new Organization();
+        if (credentials.getOrganizationId() != null) {
+            organization.setId(new IdType("Organization", credentials.getOrganizationId()));
+        }
+        final OrganizationPrincipal principal = new OrganizationPrincipal(organization);
         if (pathAuthorizer == null) {
             logger.debug("No path authorizer is present, returning principal");
             return Optional.of(principal);
@@ -53,11 +58,11 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         logger.debug("Looking up resource {} in path authorizer. With value: {}", pathAuthorizer.type(), pathAuthorizer.pathParam());
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
-        searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
+        searchParams.put("organization", Collections.singletonList(organization.getId()));
 
         // Special handling of Group resources, which use tags instead of resource properties.
         if (pathAuthorizer.type() == DPCResourceType.Group) {
-            searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));
+            searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), organization.getId())));
         }
         final Bundle bundle = this.client
                 .search()
@@ -77,7 +82,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
     }
 
     private Optional<OrganizationPrincipal> validateOrganization(OrganizationPrincipal principal, DPCAuthCredentials credentials) {
-        final String orgID = credentials.getOrganization().getId();
+        final String orgID = principal.getOrganization().getId();
         final String pathValue = credentials.getPathValue();
         logger.debug("Validating Organization {} matches path value: {}", orgID, pathValue);
         return orgID.equals("Organization/" + pathValue) ?

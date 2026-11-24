@@ -11,6 +11,8 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import jakarta.inject.Inject;
 
+import java.security.Principal;
+
 public class DPCAuthFactory implements AuthFactory {
 
     private final MacaroonBakery bakery;
@@ -31,25 +33,25 @@ public class DPCAuthFactory implements AuthFactory {
 
     @Override
     public DPCAuthFilter createPathAuthorizer(PathAuthorizer pa) {
-        return new PathAuthorizationFilter(bakery, pathAuthenticator(), dao, pa, dpc401handler);
+        return new PathAuthorizationFilter(bakery, versionedAuthenticator(), dao, pa, dpc401handler);
     }
 
-    Authenticator<DPCAuthCredentials, OrganizationPrincipal> pathAuthenticator() {
+    Authenticator<DPCAuthCredentials, Principal> versionedAuthenticator() {
         return credentials -> {
             final String version = credentials.getApiVersion();
             if ("v1".equals(version)) {
-                return stu3authenticator.authenticate(credentials);
+                return stu3authenticator.authenticate(credentials).map(Principal.class::cast);
             }
             if ("v3".equals(version)) {
-                return r4Authenticator.authenticate(credentials);
+                return r4Authenticator.authenticate(credentials).map(Principal.class::cast);
             }
-            throw new IllegalStateException("No path authenticator configured for API version: " + version);
+            throw new IllegalStateException("No authenticator configured for API version: " + version);
         };
     }
 
     @Override
     public DPCAuthFilter createStandardAuthorizer() {
-        return new PrincipalInjectionAuthFilter(bakery, stu3authenticator, dao, dpc401handler);
+        return new PrincipalInjectionAuthFilter(bakery, versionedAuthenticator(), dao, dpc401handler);
     }
 
     @Override

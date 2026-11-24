@@ -6,7 +6,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.APIHelpers;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.attribution.client.AttributionClient;

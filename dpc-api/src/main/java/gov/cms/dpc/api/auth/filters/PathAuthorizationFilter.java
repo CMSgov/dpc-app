@@ -3,7 +3,6 @@ package gov.cms.dpc.api.auth.filters;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
 import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
@@ -14,11 +13,10 @@ import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.Principal;
 import java.util.UUID;
 
 
@@ -32,7 +30,7 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
     private static final Logger logger = LoggerFactory.getLogger(PathAuthorizationFilter.class);
     private final PathAuthorizer pa;
 
-    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa, DPCUnauthorizedHandler dpc401handler) {
+    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, Principal> auth, TokenDAO dao, PathAuthorizer pa, DPCUnauthorizedHandler dpc401handler) {
         super(bakery, auth, dao, dpc401handler);
         this.pa = pa;
     }
@@ -49,10 +47,8 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
             throw new WebApplicationException("Unable to get path parameter from request", Response.Status.INTERNAL_SERVER_ERROR);
         }
 
-        final Organization organization = new Organization();
-        organization.setId(new IdType("Organization", organizationID.toString()));
         return new DPCAuthCredentials(macaroon,
-                organization,
+                organizationID.toString(),
                 this.pa, pathValue, uriInfo.getPathSegments().getFirst().getPath());
     }
 }

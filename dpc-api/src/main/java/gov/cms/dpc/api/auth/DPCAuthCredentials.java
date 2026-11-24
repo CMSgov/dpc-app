@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
-import org.hl7.fhir.dstu3.model.Organization;
 
 /**
  * Wrapper class for passing authentication state between the {@link io.dropwizard.auth.AuthFilter} and the {@link io.dropwizard.auth.Authenticator}
@@ -9,18 +8,18 @@ import org.hl7.fhir.dstu3.model.Organization;
 public class DPCAuthCredentials {
 
     private final String macaroon;
-    private final Organization organization;
+    private final String organizationId;
     private final PathAuthorizer pa;
     private final String pathValue;
     private final String apiVersion;
 
-    public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorizer pa, String pathValue) {
-        this(macaroon, organization, pa, pathValue, null);
+    public DPCAuthCredentials(String macaroon, String organizationId, PathAuthorizer pa, String pathValue) {
+        this(macaroon, organizationId, pa, pathValue, null);
     }
 
-    public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorizer pa, String pathValue, String apiVersion) {
+    public DPCAuthCredentials(String macaroon, String organizationId, PathAuthorizer pa, String pathValue, String apiVersion) {
         this.macaroon = macaroon;
-        this.organization = organization;
+        this.organizationId = organizationId;
         this.pa = pa;
         this.pathValue = pathValue;
         this.apiVersion = apiVersion;
@@ -30,8 +29,11 @@ public class DPCAuthCredentials {
         return macaroon;
     }
 
-    public Organization getOrganization() {
-        return organization;
+    /**
+     * @return the organization ID, or null for a golden macaroon on an admin operation
+     */
+    public String getOrganizationId() {
+        return organizationId;
     }
 
     public PathAuthorizer getPathAuthorizer() {

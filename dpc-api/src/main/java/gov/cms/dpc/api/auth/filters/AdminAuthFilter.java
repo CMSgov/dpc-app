@@ -14,7 +14,6 @@ import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import org.hl7.fhir.dstu3.model.Organization;
 
 import java.util.List;
 
@@ -69,6 +68,6 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
             logger.error("Attempted to call Admin endpoint with Organization token");
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
-        this.authenticate(requestContext, new DPCAuthCredentials(macaroon, new Organization(), null, null), null);
+        this.authenticate(requestContext, new DPCAuthCredentials(macaroon, null, null, null), null);
     }
 }

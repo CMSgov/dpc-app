@@ -6,8 +6,8 @@ import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.fhir.DPCResourceType;
 import jakarta.ws.rs.NotFoundException;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,17 +34,17 @@ class MacaroonsAuthenticatorUnitTest {
 
     @Test
     void testAuthenticateWithoutPathAuthorizer() {
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, null, null);
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), null, null);
 
-        assertSame(organization, authenticator.authenticate(credentials).orElseThrow().getOrganization());
+        assertEquals(organization.getId(), authenticator.authenticate(credentials).orElseThrow().getOrganization().getId());
         verifyNoInteractions(client);
     }
 
     @Test
     void testOrganizationPath() {
         when(pathAuthorizer.type()).thenReturn(DPCResourceType.Organization);
-        DPCAuthCredentials own = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, organizationId.toString());
-        DPCAuthCredentials other = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, UUID.randomUUID().toString());
+        DPCAuthCredentials own = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, organizationId.toString());
+        DPCAuthCredentials other = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, UUID.randomUUID().toString());
 
         assertTrue(authenticator.authenticate(own).isPresent());
         assertTrue(authenticator.authenticate(other).isEmpty());
@@ -58,7 +58,7 @@ class MacaroonsAuthenticatorUnitTest {
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(new Practitioner());
         when(client.searchPractitioners(organizationId, practitionerId)).thenReturn(bundle);
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, practitionerId.toString());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, practitionerId.toString());
 
         assertTrue(authenticator.authenticate(credentials).isPresent());
         verify(client).searchPractitioners(organizationId, practitionerId);
@@ -69,7 +69,7 @@ class MacaroonsAuthenticatorUnitTest {
         when(pathAuthorizer.type()).thenReturn(DPCResourceType.Practitioner);
         UUID practitionerId = UUID.randomUUID();
         when(client.searchPractitioners(organizationId, practitionerId)).thenReturn(new Bundle());
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, practitionerId.toString());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, practitionerId.toString());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> authenticator.authenticate(credentials));
         assertEquals("Practitioner not found", exception.getMessage());
@@ -83,7 +83,7 @@ class MacaroonsAuthenticatorUnitTest {
         bundle.addEntry().setResource(new Patient());
         PatientSearch search = new PatientSearch(patientId, null, organizationId, null, null, null);
         when(client.searchPatients(search)).thenReturn(bundle);
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, patientId.toString());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, patientId.toString());
 
         assertTrue(authenticator.authenticate(credentials).isPresent());
         verify(client).searchPatients(search);
@@ -95,7 +95,7 @@ class MacaroonsAuthenticatorUnitTest {
         UUID patientId = UUID.randomUUID();
         PatientSearch search = new PatientSearch(patientId, null, organizationId, null, null, null);
         when(client.searchPatients(search)).thenReturn(new Bundle());
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, patientId.toString());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, patientId.toString());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> authenticator.authenticate(credentials));
         assertEquals("Patient not found", exception.getMessage());
@@ -104,7 +104,7 @@ class MacaroonsAuthenticatorUnitTest {
     @Test
     void testUnsupportedPathTypeFailsClosed() {
         when(pathAuthorizer.type()).thenReturn(DPCResourceType.Group);
-        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, UUID.randomUUID().toString());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organizationId.toString(), pathAuthorizer, UUID.randomUUID().toString());
 
         assertThrows(IllegalStateException.class, () -> authenticator.authenticate(credentials));
         verifyNoInteractions(client);

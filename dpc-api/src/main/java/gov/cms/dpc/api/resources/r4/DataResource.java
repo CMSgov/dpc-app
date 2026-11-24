@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources.r4;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.core.CompressibleStreamingOutput;
 import gov.cms.dpc.api.models.RangeHeader;

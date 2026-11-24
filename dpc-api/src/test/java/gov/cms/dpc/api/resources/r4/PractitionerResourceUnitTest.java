@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;

@@ -373,7 +373,7 @@ class DataResourceUnitTest {
 
         final DataResource dataResource = new DataResource(manager, client, queue);
         final FhirContext ctx = FhirContext.forDstu3();
-        final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
+        final AuthFilter<DPCAuthCredentials, java.security.Principal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
         return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource),
                 List.of(staticFilter,

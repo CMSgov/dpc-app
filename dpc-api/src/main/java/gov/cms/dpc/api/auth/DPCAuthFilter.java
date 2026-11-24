@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +32,7 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
  * <p>
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
-public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
+public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Principal> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
@@ -41,7 +42,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     private final DPCUnauthorizedHandler dpc401handler;
 
 
-    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler ) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, Principal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler ) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
@@ -56,7 +57,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
-        final String orgId = dpcAuthCredentials.getOrganization().getId();
+        final String orgId = "Organization/" + dpcAuthCredentials.getOrganizationId();
         final String resourceRequested = XSSSanitizerUtil.sanitize(uriInfo.getPath());
         final String method = requestContext.getMethod();
 

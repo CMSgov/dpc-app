@@ -2,8 +2,6 @@ package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.r4.APITestHelpers;
-import gov.cms.dpc.api.auth.DPCAuthCredentials;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
@@ -17,8 +15,6 @@ import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import io.dropwizard.auth.AuthFilter;
-import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.client.Invocation;
@@ -373,12 +369,11 @@ class DataResourceUnitTest {
 
         final DataResource dataResource = new DataResource(manager, client, queue);
         final FhirContext ctx = FhirContext.forR4();
-        final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
+        final StaticAuthFilter staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
         return APITestHelpers.buildResourceExtension(ctx,
                 Collections.singletonList(new BaseResource(null, dataResource, null, null, null, null, null, null)),
                 List.of(staticFilter,
-                        new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
                         new HttpRangeHeaderParamConverterProvider(),
                         new ChecksumConverterProvider(),
                         new StreamingContentSizeFilter()), false);

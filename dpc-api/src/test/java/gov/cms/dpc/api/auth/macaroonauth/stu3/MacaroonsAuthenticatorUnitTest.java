@@ -26,9 +26,9 @@ class MacaroonsAuthenticatorUnitTest {
 
 	@Test
 	void test_authenticate_no_path_authorizer() {
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, null, "path");
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", null, null, "path");
 		OrganizationPrincipal principal = macaroonsAuthenticator.authenticate(dpcAuthCredentials).get();
-		assertSame(org, principal.getOrganization());
+		assertNull(principal.getOrganization().getId());
 	}
 
 	@Test
@@ -37,9 +37,9 @@ class MacaroonsAuthenticatorUnitTest {
 		String orgIdBase = UUID.randomUUID().toString();
 		org.setId("Organization/" + orgIdBase);
 
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, pa, orgIdBase);
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", orgIdBase, pa, orgIdBase);
 		OrganizationPrincipal principal = macaroonsAuthenticator.authenticate(dpcAuthCredentials).get();
-		assertSame(org, principal.getOrganization());
+		assertEquals(org.getId(), principal.getOrganization().getId());
 	}
 
 	@Test
@@ -48,7 +48,7 @@ class MacaroonsAuthenticatorUnitTest {
 		String orgIdBase = UUID.randomUUID().toString();
 		org.setId("Organization/" + orgIdBase);
 
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, pa, "fakeId");
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", orgIdBase, pa, "fakeId");
 		assertTrue(macaroonsAuthenticator.authenticate(dpcAuthCredentials).isEmpty());
 	}
 
@@ -58,10 +58,10 @@ class MacaroonsAuthenticatorUnitTest {
 		String orgIdBase = UUID.randomUUID().toString();
 		org.setId("Organization/" + orgIdBase);
 
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, pa, "fakeId");
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", orgIdBase, pa, "fakeId");
 		Map<String, List<String>> searchParams = new HashMap<>();
 		searchParams.put("_id", Collections.singletonList(dpcAuthCredentials.getPathValue()));
-		searchParams.put("organization", Collections.singletonList(dpcAuthCredentials.getOrganization().getId()));
+		searchParams.put("organization", Collections.singletonList(org.getId()));
 
 		IQuery<IBaseBundle> searchQuery = mock(IQuery.class);
 		when(client
@@ -78,7 +78,7 @@ class MacaroonsAuthenticatorUnitTest {
 		when(whereMapQuery.returnBundle(Bundle.class).encodedJson()).thenReturn(bundleQuery);
 		when(bundleQuery.execute()).thenReturn(bundle);
 
-		assertSame(org, macaroonsAuthenticator.authenticate(dpcAuthCredentials).get().getOrganization());
+		assertEquals(org.getId(), macaroonsAuthenticator.authenticate(dpcAuthCredentials).get().getOrganization().getId());
 	}
 
 	@Test
@@ -87,10 +87,10 @@ class MacaroonsAuthenticatorUnitTest {
 		String orgIdBase = UUID.randomUUID().toString();
 		org.setId("Organization/" + orgIdBase);
 
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, pa, "fakeId");
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", orgIdBase, pa, "fakeId");
 		Map<String, List<String>> searchParams = new HashMap<>();
 		searchParams.put("_id", Collections.singletonList(dpcAuthCredentials.getPathValue()));
-		searchParams.put("organization", Collections.singletonList(dpcAuthCredentials.getOrganization().getId()));
+		searchParams.put("organization", Collections.singletonList(org.getId()));
 
 		IQuery<IBaseBundle> searchQuery = mock(IQuery.class);
 		when(client
@@ -118,11 +118,11 @@ class MacaroonsAuthenticatorUnitTest {
 		String orgIdBase = UUID.randomUUID().toString();
 		org.setId("Organization/" + orgIdBase);
 
-		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", org, pa, "fakeId");
+		DPCAuthCredentials dpcAuthCredentials = new DPCAuthCredentials("macaroon", orgIdBase, pa, "fakeId");
 		Map<String, List<String>> searchParams = new HashMap<>();
 		searchParams.put("_id", Collections.singletonList(dpcAuthCredentials.getPathValue()));
-		searchParams.put("organization", Collections.singletonList(dpcAuthCredentials.getOrganization().getId()));
-		searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), dpcAuthCredentials.getOrganization().getId())));
+		searchParams.put("organization", Collections.singletonList(org.getId()));
+		searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), org.getId())));
 
 		IQuery<IBaseBundle> searchQuery = mock(IQuery.class);
 		when(client
@@ -139,6 +139,6 @@ class MacaroonsAuthenticatorUnitTest {
 		when(whereMapQuery.returnBundle(Bundle.class).encodedJson()).thenReturn(bundleQuery);
 		when(bundleQuery.execute()).thenReturn(bundle);
 
-		assertSame(org, macaroonsAuthenticator.authenticate(dpcAuthCredentials).get().getOrganization());
+		assertEquals(org.getId(), macaroonsAuthenticator.authenticate(dpcAuthCredentials).get().getOrganization().getId());
 	}
 }

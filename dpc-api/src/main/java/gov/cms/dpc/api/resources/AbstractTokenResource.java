@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.resources;
 
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
@@ -14,6 +13,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -22,27 +22,27 @@ import java.util.UUID;
 @Path("/Token")
 @Produces(value = MediaType.APPLICATION_JSON)
 @Consumes(value = MediaType.APPLICATION_JSON)
-public abstract class AbstractTokenResource {
+public abstract class AbstractTokenResource<P extends Principal> {
 
     protected AbstractTokenResource() {
         // Not used
     }
 
     /**
-     * Get authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
+     * Get authentication token for the authenticated organization.
      * If no tokens exist, returns an empty {@link List}
      *
-     * @param organizationPrincipal - {@link OrganizationPrincipal} supplied by auth handler
+     * @param organizationPrincipal - principal supplied by auth handler
      * @return - {@link List} {@link String} base64 (URL) encoded token
      */
     @GET
-    public abstract CollectionResponse<TokenEntity> getOrganizationTokens(OrganizationPrincipal organizationPrincipal);
+    public abstract CollectionResponse<TokenEntity> getOrganizationTokens(P organizationPrincipal);
 
     /**
-     * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
+     * Create authentication token for the authenticated organization.
      * This token is designed to be long-lived and delegatable.
      *
-     * @param principal   - {@link OrganizationPrincipal} supplied by auth handler
+     * @param principal   - principal supplied by auth handler
      * @param label       - {@link Optional} {@link String} to use as token label
      * @param expiration  - {@link Optional} {@link OffsetDateTime} to use for token expiration
      * @param requestBody - {@link CreateTokenRequest} model representing token resource. Token fields take precedence over query parameters.
@@ -50,11 +50,11 @@ public abstract class AbstractTokenResource {
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @Valid CreateTokenRequest requestBody, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenEntity createOrganizationToken(P principal, @Valid CreateTokenRequest requestBody, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")
-    public abstract TokenEntity getOrganizationToken(OrganizationPrincipal principal, @NotNull UUID tokenID);
+    public abstract TokenEntity getOrganizationToken(P principal, @NotNull UUID tokenID);
 
     @POST
     @Path("/auth")
@@ -69,5 +69,5 @@ public abstract class AbstractTokenResource {
 
     @DELETE
     @Path("/{tokenID}")
-    public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull UUID tokenID);
+    public abstract Response deleteOrganizationToken(P organizationPrincipal, @NotNull UUID tokenID);
 }

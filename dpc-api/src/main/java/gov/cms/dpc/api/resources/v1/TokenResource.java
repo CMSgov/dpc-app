@@ -66,7 +66,7 @@ import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Token")
-public class TokenResource extends AbstractTokenResource {
+public class TokenResource extends AbstractTokenResource<OrganizationPrincipal> {
 
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     // This will be removed as part of DPC-747

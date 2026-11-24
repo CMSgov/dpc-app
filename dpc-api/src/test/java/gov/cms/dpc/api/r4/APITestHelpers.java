@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.validation.FhirValidator;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -27,7 +27,7 @@ import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
-import io.dropwizard.auth.AuthValueFactoryProvider;
+import gov.cms.dpc.api.auth.OrganizationAuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.validation.Validation;
@@ -41,12 +41,11 @@ import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
@@ -87,12 +86,11 @@ public class APITestHelpers {
     }
 
     public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
-        // Authentication principals remain STU3 even when the API resource is R4.
         Organization organization = new Organization();
         organization.setId(id);
-        organization.addIdentifier(new Identifier()
+        organization.addIdentifier()
                 .setSystem(DPCIdentifierSystem.NPPES.getSystem())
-                .setValue(ORGANIZATION_NPI));
+                .setValue(ORGANIZATION_NPI);
         return new OrganizationPrincipal(organization);
     }
 
@@ -123,7 +121,7 @@ public class APITestHelpers {
                 .addProvider(DefaultFHIRExceptionMapper.class)
                 .addProvider(DataFormatExceptionMapper.class)
                 .addProvider(JsonParseExceptionMapper.class)
-                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+                .addProvider(new OrganizationAuthValueFactoryProvider.Binder());
 
         if (validation) {
             ValidationSupportChain support = new ValidationSupportChain(

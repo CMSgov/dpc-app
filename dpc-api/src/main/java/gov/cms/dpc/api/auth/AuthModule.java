@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
+import java.security.Principal;
+
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
  * if {@link DPCAPIConfiguration#isAuthenticationDisabled()} returns {@code true} then the {@link StaticAuthFilter} is used.
@@ -40,7 +42,8 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         if (configuration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
             binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
-            binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
+            binder.bind(new TypeLiteral<Authenticator<DPCAuthCredentials, Principal>>() {
+                }).to(StaticAuthenticator.class);
 
         } else {
             binder.bind(DPCUnauthorizedHandler.class);
