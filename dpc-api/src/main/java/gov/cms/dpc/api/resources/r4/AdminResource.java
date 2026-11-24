@@ -13,7 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import org.hl7.fhir.r4.model.Bundle;
 
-
+@FHIR
 @Api(value = "Admin", authorizations = @Authorization(value = "access_token"))
 public class AdminResource {
     private final AttributionClient attributionClient;
