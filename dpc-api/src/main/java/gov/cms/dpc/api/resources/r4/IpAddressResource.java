@@ -8,7 +8,6 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
-import gov.cms.dpc.api.resources.AbstractIpAddressResource;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -26,8 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "IpAddress"}, authorizations = @Authorization(value = "access_token"))
-@Path("/v3/IpAddress")
-public class IpAddressResource extends AbstractIpAddressResource {
+public class IpAddressResource {
     private static final Logger logger = LoggerFactory.getLogger(IpAddressResource.class);
     static final int MAX_IPS = 8;
     private final IpAddressDAO dao;
@@ -37,7 +35,6 @@ public class IpAddressResource extends AbstractIpAddressResource {
         this.dao = dao;
     }
 
-    @Override
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Timed
@@ -52,7 +49,6 @@ public class IpAddressResource extends AbstractIpAddressResource {
         return new CollectionResponse<>(this.dao.fetchIpAddresses(organizationPrincipal.getID()));
     }
 
-    @Override
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -90,7 +86,6 @@ public class IpAddressResource extends AbstractIpAddressResource {
         }
     }
 
-    @Override
     @DELETE
     @Path("/{ipAddressId}")
     @Timed

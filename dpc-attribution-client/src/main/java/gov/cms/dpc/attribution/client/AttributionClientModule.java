@@ -16,6 +16,10 @@ import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import java.util.Objects;
@@ -27,6 +31,16 @@ import java.util.Objects;
  */
 public class AttributionClientModule<T extends Configuration & AttributionBundleConfiguration>
         extends DropwizardAwareModule<T> {
+
+    // HAPI and Apache don't play nice together.  Apache sometimes closes its HTTP stream before HAPI reads
+    // it, so it needs to be made repeatable to ensure HAPI can always read it.
+    // Package-private so it can be exercised directly in AttributionClientModuleUnitTest.
+    static final HttpResponseInterceptor BUFFER_NON_REPEATABLE_ENTITY = (response, details, httpContext) -> {
+        if (response instanceof HttpEntityContainer container && container.getEntity() != null
+                && !container.getEntity().isRepeatable()) {
+            container.setEntity(new BufferedHttpEntity(container.getEntity()));
+        }
+    };
 
     private FHIRClientConfiguration clientConfiguration;
 
@@ -64,7 +78,12 @@ public class AttributionClientModule<T extends Configuration & AttributionBundle
     // ClientFactory with settings specific to calling dpc-attribution.
     public FhirContext provideAttributionContext() {
         FhirContext context = FhirContext.forR4();
-        context.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(context));
+        context.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(context) {
+            @Override
+            protected HttpClientBuilder getHttpClientBuilder() {
+                return super.getHttpClientBuilder().addResponseInterceptorFirst(BUFFER_NON_REPEATABLE_ENTITY);
+            }
+        });
         return context;
     }
 
