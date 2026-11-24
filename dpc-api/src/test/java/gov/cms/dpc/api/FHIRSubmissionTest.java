@@ -33,6 +33,7 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -304,7 +305,7 @@ class FHIRSubmissionTest {
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
         Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
-        final Function<ContainerRequest, Provenance> func = mock(Function.class);
+        final Function<ContainerRequest, IBaseResource> func = mock(Function.class);
         Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
     }
 }
