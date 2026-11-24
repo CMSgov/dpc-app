@@ -14,12 +14,23 @@ import com.google.inject.name.Names;
 import gov.cms.dpc.attribution.client.config.AttributionBundleConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.hibernate.SessionFactory;
 import io.dropwizard.core.Configuration;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AttributionClientModuleUnitTest {
 
@@ -95,6 +106,56 @@ class AttributionClientModuleUnitTest {
         // Asking for a "fhirContextAttributionR4" context should be different from our stu3 and sharedR4 above
         assertNotSame(stu3, injector.getInstance(CONTEXT_KEY));
         assertNotSame(sharedR4, injector.getInstance(CONTEXT_KEY));
+    }
+
+    @Test
+    void bufferInterceptor_wrapsNonRepeatableEntity() throws Exception {
+        ClassicHttpResponse response = new BasicClassicHttpResponse(200, "OK");
+        HttpEntity nonRepeatable = mock(HttpEntity.class);
+        when(nonRepeatable.isRepeatable()).thenReturn(false);
+        response.setEntity(nonRepeatable);
+
+        AttributionClientModule.BUFFER_NON_REPEATABLE_ENTITY.process(response, null, null);
+
+        assertInstanceOf(BufferedHttpEntity.class, response.getEntity());
+    }
+
+    @Test
+    void bufferInterceptor_leavesRepeatableEntityUntouched() throws Exception {
+        ClassicHttpResponse response = new BasicClassicHttpResponse(200, "OK");
+        HttpEntity repeatable = mock(HttpEntity.class);
+        when(repeatable.isRepeatable()).thenReturn(true);
+        response.setEntity(repeatable);
+
+        AttributionClientModule.BUFFER_NON_REPEATABLE_ENTITY.process(response, null, null);
+
+        assertSame(repeatable, response.getEntity());
+    }
+
+    @Test
+    void bufferInterceptor_handlesMissingEntity() throws IOException {
+        try (ClassicHttpResponse response = new BasicClassicHttpResponse(200, "OK")) {
+            assertDoesNotThrow(() -> AttributionClientModule.BUFFER_NON_REPEATABLE_ENTITY.process(response, null, null));
+        }
+    }
+
+    @Test
+    void bufferInterceptor_makesContentReadableMoreThanOnce() throws Exception {
+        String body = "{\"resourceType\":\"Bundle\"}";
+        ClassicHttpResponse response = new BasicClassicHttpResponse(200, "OK");
+        InputStreamEntity streamed = new InputStreamEntity(
+                new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)), ContentType.APPLICATION_JSON);
+        assertFalse(streamed.isRepeatable(), "A raw input-stream entity should not be repeatable to begin with");
+        response.setEntity(streamed);
+
+        AttributionClientModule.BUFFER_NON_REPEATABLE_ENTITY.process(response, null, null);
+
+        HttpEntity buffered = response.getEntity();
+        assertTrue(buffered.isRepeatable());
+        String firstRead = new String(buffered.getContent().readAllBytes(), StandardCharsets.UTF_8);
+        String secondRead = new String(buffered.getContent().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(body, firstRead);
+        assertEquals(body, secondRead);
     }
 
     private static AbstractModule consentDatabaseModule() {
