@@ -251,7 +251,9 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         sinceFilter.set("name", TextNode.valueOf("_since"));
         sinceFilter.set("value", TextNode.valueOf(request.since().toString()));
 
-        filters.add(objectMapper.readTree(DEFAULT_TYPE_FILTER_JSON));
+        if (request.resourceTypes().contains("ExplanationOfBenefit")) {
+            filters.add(objectMapper.readTree(DEFAULT_TYPE_FILTER_JSON));
+        }
 
         return objectMapper.writeValueAsString(root);
     }

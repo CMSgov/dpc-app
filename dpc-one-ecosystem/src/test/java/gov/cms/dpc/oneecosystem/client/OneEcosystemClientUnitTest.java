@@ -143,6 +143,22 @@ class OneEcosystemClientUnitTest {
     }
 
     @Test
+    void shouldIncludeTypeFilterInPayloadForEob() throws IOException {
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
+        var client = newOEClient();
+        ArgumentCaptor<HttpPost> apiRequest = ArgumentCaptor.forClass(HttpPost.class);
+        when(httpClient.execute(apiRequest.capture(), any(HttpClientResponseHandler.class)))
+                .thenAnswer(response(202, null));
+
+        var eobRequest = new OneEcosystemExportRequest(EXPORT_REQUEST.mbis(), EXPORT_REQUEST.since(),
+                List.of("ExplanationOfBenefit"), EXPORT_REQUEST.sourceQuery());
+        client.export(eobRequest);
+
+        var body = Jackson.newObjectMapper().readTree(apiRequest.getValue().getEntity().getContent());
+        assertTrue(body.path("queries").get(0).path("filters").findValuesAsText("name").contains("_typeFilter"));
+    }
+
+    @Test
     void shouldReturnAcceptedExportResponse() throws IOException {
         mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
         var client = newOEClient();
