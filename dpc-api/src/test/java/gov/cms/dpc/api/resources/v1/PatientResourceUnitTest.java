@@ -9,7 +9,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.net.HttpHeaders;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APITestHelpers.createProvenance;
+import static gov.cms.dpc.api.v1.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;

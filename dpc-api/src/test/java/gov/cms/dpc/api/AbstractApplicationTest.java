@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -23,8 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

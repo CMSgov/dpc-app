@@ -65,6 +65,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
         final Optional<JobQueueBatch> first = this.queue.values()
                 .stream()
                 .filter(jobQueueBatch -> jobQueueBatch.getStatus().equals(JobStatus.QUEUED))
+                .filter(jobQueueBatch -> !jobQueueBatch.isExternal())
                 .findFirst();
 
         if (first.isPresent()) {
@@ -109,6 +110,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     public synchronized long queueSize() {
         return this.queue.values().stream()
                 .filter(batch -> batch.getStatus().equals(JobStatus.QUEUED))
+                .filter(batch -> !batch.isExternal())
                 .count();
     }
 

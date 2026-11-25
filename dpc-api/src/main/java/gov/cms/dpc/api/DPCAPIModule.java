@@ -11,7 +11,6 @@ import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
-import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
@@ -23,10 +22,7 @@ import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
-import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.annotations.JobTimeout;
-import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.annotations.*;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
@@ -37,6 +33,7 @@ import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import jakarta.inject.Named;
@@ -71,6 +68,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // V3 Resources
         binder.bind(gov.cms.dpc.api.resources.r4.BaseResource.class);
         binder.bind(gov.cms.dpc.api.resources.r4.GroupResource.class);
+        binder.bind(gov.cms.dpc.api.resources.r4.JobResource.class);
 
         // DAO
         binder.bind(PublicKeyDAO.class);
@@ -194,7 +192,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public String providesV3URL() {
         return configuration().getPublicURL() + "/v3";
     }
-
 
     @Provides
     @APIV1

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static gov.cms.dpc.queue.models.JobQueueBatch.INTERNAL_EXPORT_SOURCE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -82,7 +83,7 @@ class JobQueueBatchTest {
     @Test
     void testDefaultExportFields() {
         final var job = createJobQueueBatch();
-        assertEquals("internal-dpc", job.getExportSource());
+        assertEquals(INTERNAL_EXPORT_SOURCE, job.getExportSource());
         assertEquals("V1", job.getExportVersion());
         assertTrue(job.getGroupID().isEmpty());
     }
@@ -91,7 +92,7 @@ class JobQueueBatchTest {
     void testV3ConstructorFields() {
         final var job = createV3JobQueueBatch();
         assertEquals(groupID, job.getGroupID().get());
-        assertEquals("external-bcda", job.getExportSource());
+        assertEquals(JobQueueBatch.EXTERNAL_EXPORT_SOURCE, job.getExportSource());
         assertEquals("V3", job.getExportVersion());
     }
 
@@ -445,7 +446,7 @@ class JobQueueBatchTest {
                 .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .isBulk(true)
                 .groupID(groupID)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .build();
     }
@@ -497,7 +498,7 @@ class JobQueueBatchTest {
             var job1 = builder.build();
             var job2 = builder
                     .groupID(groupID)
-                    .exportSource("external-bcda")
+                    .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                     .exportVersion("V3")
                     .build();
             job1.submitTime = timestamp;

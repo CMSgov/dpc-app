@@ -43,6 +43,16 @@ public interface IJobQueue {
                    boolean isBulk,
                    boolean isSmoke);
 
+
+    /**
+     * Create and submit an external job into the queue.
+     *
+     * @param batch     The populated job queue batch
+     * @param isSmoke   Flag to indicate smoke test request
+     * @return The jobID, echoed back for convenience
+     */
+    UUID createExternalJob(JobQueueBatch batch, boolean isSmoke);
+
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
      *
@@ -95,7 +105,7 @@ public interface IJobQueue {
     /**
      * Completes the current batch.
      *
-     * @param job          - the job batch to compelte
+     * @param job          - the job batch to complete
      * @param aggregatorID - the current aggregator working the job
      */
     void completeBatch(JobQueueBatch job, UUID aggregatorID);

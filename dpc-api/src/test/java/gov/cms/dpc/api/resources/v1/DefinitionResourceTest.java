@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;

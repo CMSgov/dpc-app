@@ -48,6 +48,7 @@ import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
+@Deprecated(since = "v3")
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Group")
 public class GroupResource extends AbstractGroupResource {

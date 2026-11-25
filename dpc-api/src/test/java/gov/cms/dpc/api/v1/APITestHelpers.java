@@ -1,4 +1,4 @@
-package gov.cms.dpc.api;
+package gov.cms.dpc.api.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -27,7 +27,7 @@ import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.stu3.FHIRPatientBuilder;
-import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -66,7 +66,7 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
     public static String ORGANIZATION_NPI = "1111111112";
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String CONFIG_PATH = "src/test/resources/test.application.yml";
 
     private APITestHelpers() {
         // Not used
@@ -192,7 +192,7 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+    public static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
         // Truncate attribution database
         truncateDatabase();
@@ -200,9 +200,9 @@ public class APITestHelpers {
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", CONFIG_PATH);
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "migrate", configPath);
+        application.getApplication().run("db", "migrate", CONFIG_PATH);
 
     }
 
@@ -218,7 +218,7 @@ public class APITestHelpers {
         }
     }
 
-    static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+    public static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());

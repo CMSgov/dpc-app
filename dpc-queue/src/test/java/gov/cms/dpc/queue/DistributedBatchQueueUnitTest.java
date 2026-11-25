@@ -73,6 +73,29 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		assertTrue(age > 0 && age < .001);
 	}
 
+    @Test
+    void test_queueAge_excludes_external_jobs() {
+        final JobQueueBatch externalBatch = new JobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(UUID.randomUUID())
+                .orgNPI("orgNpi")
+                .providerNPI("providerNpi")
+                .patients(List.of())
+                .resourceTypes(List.of())
+                .requestUrl("reqUrl")
+                .isBulk(true)
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
+                .exportVersion("V3")
+                .build();
+
+        Transaction transaction = session.beginTransaction();
+        session.createMutationQuery("DELETE from JobQueueBatch").executeUpdate();
+        session.persist(externalBatch);
+        transaction.commit();
+
+        assertEquals(0, queue.queueAge());
+    }
+
 	@Test
 	void test_queueType_works() {
 		assertEquals("Database Queue", queue.queueType());
@@ -87,6 +110,29 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		transaction.commit();
 
 		assertEquals(1, queue.queueSize());
+    }
+
+    @Test
+    void test_queueSize_excludes_external_jobs() {
+        final JobQueueBatch externalBatch = new JobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(UUID.randomUUID())
+                .orgNPI("orgNpi")
+                .providerNPI("providerNpi")
+                .patients(List.of())
+                .resourceTypes(List.of())
+                .requestUrl("reqUrl")
+                .isBulk(true)
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
+                .exportVersion("V3")
+                .build();
+
+        Transaction transaction = session.beginTransaction();
+        session.persist(jobQueueBatch);
+        session.persist(externalBatch);
+        transaction.commit();
+
+        assertEquals(1, queue.queueSize(), "queueSize should only count internal jobs");
     }
 
 	@Test
@@ -146,4 +192,29 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		assertEquals(batchId, retrievedJobQueueBatchFile.getBatchID());
 		assertEquals(jobId, retrievedJobQueueBatchFile.getJobID());
 	}
+
+    @Test
+    void test_claimBatch_does_not_claim_external_jobs() {
+        final JobQueueBatch externalBatch = new JobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(UUID.randomUUID())
+                .orgNPI("orgNpi")
+                .providerNPI("providerNpi")
+                .patients(List.of())
+                .resourceTypes(List.of())
+                .requestUrl("reqUrl")
+                .isBulk(true)
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
+                .exportVersion("V3")
+                .build();
+
+        Transaction transaction = session.beginTransaction();
+        session.createMutationQuery("DELETE from JobQueueBatch").executeUpdate();
+        session.persist(externalBatch);
+        transaction.commit();
+
+        Optional<JobQueueBatch> claimed = queue.claimBatch(UUID.randomUUID());
+
+        assertTrue(claimed.isEmpty(), "claimBatch should never claim an external job");
+    }
 }

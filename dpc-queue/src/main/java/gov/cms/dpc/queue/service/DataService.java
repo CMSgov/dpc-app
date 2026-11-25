@@ -151,6 +151,13 @@ public class DataService {
         );
     }
 
+    /**
+     * Creates an external job on the queue.
+     */
+    public UUID createExternalJob(JobQueueBatch batch, boolean isSmoke) {
+        return this.queue.createExternalJob(batch, isSmoke);
+    }
+
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
         CompletableFuture<Optional<List<JobQueueBatch>>> dataFuture = new CompletableFuture<>();
         final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
