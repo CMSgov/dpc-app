@@ -40,8 +40,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
@@ -285,6 +288,31 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         Bundle thirdPage = client.loadPage().next(secondPage).execute();
 
         assertEquals(1, thirdPage.getEntry().size(), "should only contain the 101st patient");
+    }
+
+    @Test
+    void testFilteredPatientPagingLinksStayFiltered() throws IOException {
+        // Make sure if we search by Mbi that the parameter gets carried over to our Bundle links
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        String mbi = "4S41C00AA00";
+        Bundle filteredPage = APITestHelpers.resourceSearch(client, DPCResourceType.Patient,
+                Map.of("_count", List.of("1"), Patient.SP_IDENTIFIER, List.of(mbi)));
+
+        assertEquals(1, filteredPage.getEntry().size());
+        for (String relation : List.of(IBaseBundle.LINK_SELF, "first")) {
+            String url = filteredPage.getLink(relation).getUrl();
+            assertTrue(url.startsWith(getBaseURL() + "/Patient?"));
+            String encodedIdentifier = List.of(URI.create(url).getRawQuery().split("&")).stream()
+                    .filter(param -> param.startsWith(Patient.SP_IDENTIFIER + "="))
+                    .findFirst().orElseThrow().substring((Patient.SP_IDENTIFIER + "=").length());
+            assertEquals(DPCIdentifierSystem.MBI.getSystem() + "|" + mbi,
+                    URLDecoder.decode(encodedIdentifier, StandardCharsets.UTF_8));
+            Bundle followedPage = client.search().byUrl(url).returnBundle(Bundle.class).encodedJson().execute();
+            assertEquals(1, followedPage.getEntry().size());
+            Patient patient = (Patient) followedPage.getEntryFirstRep().getResource();
+            assertEquals(mbi, patient.getIdentifierFirstRep().getValue());
+        }
     }
 
     @Test

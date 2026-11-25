@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.jdbi.r4.PatientDAO;
 import gov.cms.dpc.common.entities.r4.OrganizationEntity;
 import gov.cms.dpc.common.entities.r4.PatientEntity;
 import gov.cms.dpc.common.utils.r4.PagingService;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -15,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers.*;
@@ -91,6 +95,46 @@ class PatientResourceUnitTest {
         assertEquals(expectedFirstUrl, resultBundle.getLink("first").getUrl());
         assertEquals(expectedSelfUrl, resultBundle.getLink(IBaseBundle.LINK_SELF).getUrl());
         assertEquals(count, resultBundle.getEntry().size());
+    }
+
+    @Test
+    void testFilteredSearchPagingLinksIncludeIdentifier() {
+        UUID orgId = UUID.randomUUID();
+        String mbi = "4S41C00AA00";
+        String identifier = DPCIdentifierSystem.MBI.getSystem() + "|" + mbi;
+        OrganizationEntity org = createOrganizationEntity();
+        org.setId(orgId);
+        PatientEntity patient = createPatientEntity(org);
+        patient.setID(UUID.randomUUID());
+        patient.setBeneficiaryID(mbi);
+
+        // Mock only returns PageResult when all args match
+        Mockito.when(patientDAO.patientSearch(argThat(query -> query != null
+                && Objects.equals(query.getOrganizationID().orElse(null), orgId)
+                && Objects.equals(query.getPatientMBI().orElse(null), mbi)
+                && Objects.equals(query.getCount().orElse(null), 1)
+                && Objects.equals(query.getPageOffset().orElse(null), 0))))
+                .thenReturn(new PageResult<>(List.of(patient), false));
+
+        Bundle bundle = patientResource.searchPatients(null, identifier, "Organization/" + orgId, 1, 0, null);
+
+        assertEquals(1, bundle.getEntry().size());
+        for (String relation : List.of(IBaseBundle.LINK_SELF, "first")) {
+            String url = bundle.getLink(relation).getUrl();
+            URI uri = URI.create(url);
+            assertEquals("/r4/Patient", uri.getPath());
+            List<String> parameters = List.of(uri.getRawQuery().split("&"));
+            assertEquals(3, parameters.size());
+            assertTrue(parameters.contains("_count=1"));
+            assertTrue(parameters.contains("_offset=0"));
+            String value = parameters.stream()
+                    .filter(param -> param.startsWith("identifier="))
+                    .findFirst().orElseThrow().substring("identifier=".length());
+            assertTrue(value.contains("%7C"));
+            assertEquals(identifier, URLDecoder.decode(value, StandardCharsets.UTF_8));
+        }
+        assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
+        assertNull(bundle.getLink(IBaseBundle.LINK_NEXT));
     }
 
     @Test

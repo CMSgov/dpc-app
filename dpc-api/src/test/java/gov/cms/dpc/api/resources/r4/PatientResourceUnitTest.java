@@ -25,7 +25,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,9 +94,11 @@ class PatientResourceUnitTest {
     void testPatientSearchWithEmptyIdentifier() {
         OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         Bundle bundle = new Bundle();
+        bundle.addLink().setRelation(IBaseBundle.LINK_SELF).setUrl("/r4/Patient?_count=1&_offset=0");
         when(attributionClient.searchPatients(any(PatientSearch.class))).thenReturn(bundle);
 
         assertSame(bundle, patientResource.patientSearch(principal, "", null, null));
+        assertEquals(BASE_URL + "/v3/Patient?_count=1&_offset=0", bundle.getLink(IBaseBundle.LINK_SELF).getUrl());
         verify(attributionClient).searchPatients(new PatientSearch(null, "", principal.getID(), null, null, null));
     }
 
@@ -153,6 +159,42 @@ class PatientResourceUnitTest {
         assertEquals(BASE_URL + "/v3/Patient?_count=10&_offset=0", response.getLink("first").getUrl());
         assertEquals("/r4/Patient/other", response.getLink("related").getUrl());
         verify(attributionClient).searchPatients(new PatientSearch(null, null, principal.getID(), 10, 10, null));
+    }
+
+    @Test
+    void testFilteredPagingLinksRetainIdentifier() {
+        // Make sure if we search by Mbi that the parameter gets carried over to our Bundle links
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
+        String patientMBI = "3aa0C00aA00";
+        String identifier = DPCIdentifierSystem.MBI.getSystem() + "|" + patientMBI;
+        String pagingFilter = Patient.SP_IDENTIFIER + "=" + URLEncoder.encode(identifier, StandardCharsets.UTF_8);
+        Bundle bundle = createPatientBundle(1, principal.getID());
+        bundle.addLink().setRelation(IBaseBundle.LINK_SELF).setUrl("/r4/Patient?_count=1&_offset=1&" + pagingFilter);
+        bundle.addLink().setRelation(IBaseBundle.LINK_PREV).setUrl("/r4/Patient?_count=1&_offset=0&" + pagingFilter);
+        bundle.addLink().setRelation(IBaseBundle.LINK_NEXT).setUrl("/r4/Patient?_count=1&_offset=2&" + pagingFilter);
+        bundle.addLink().setRelation("first").setUrl("/r4/Patient?_count=1&_offset=0&" + pagingFilter);
+        bundle.addLink().setRelation("related").setUrl("/r4/Patient/other");
+        when(attributionClient.searchPatients(any(PatientSearch.class))).thenReturn(bundle);
+
+        Bundle response = patientResource.patientSearch(principal, patientMBI, 1, 1);
+
+        for (Map.Entry<String, Integer> link : Map.of(IBaseBundle.LINK_SELF, 1, IBaseBundle.LINK_PREV, 0,
+                IBaseBundle.LINK_NEXT, 2, "first", 0).entrySet()) {
+            String url = response.getLink(link.getKey()).getUrl();
+            assertEquals(BASE_URL + "/v3/Patient?_count=1&_offset=" + link.getValue() + "&" + pagingFilter, url);
+            String rawQuery = URI.create(url).getRawQuery();
+            List<String> parameters = List.of(rawQuery.split("&"));
+            assertEquals(3, parameters.size());
+            assertTrue(parameters.contains("_count=1"));
+            assertTrue(parameters.contains("_offset=" + link.getValue()));
+            assertTrue(rawQuery.contains("%7C"), "Qualified identifiers must be URL encoded");
+            String value = parameters.stream()
+                    .filter(param -> param.startsWith(Patient.SP_IDENTIFIER + "="))
+                    .findFirst().orElseThrow().substring((Patient.SP_IDENTIFIER + "=").length());
+            assertEquals(identifier, URLDecoder.decode(value, StandardCharsets.UTF_8));
+        }
+        assertEquals("/r4/Patient/other", response.getLink("related").getUrl());
+        verify(attributionClient).searchPatients(new PatientSearch(null, patientMBI, principal.getID(), 1, 1, null));
     }
 
     @Test
