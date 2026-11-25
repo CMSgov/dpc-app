@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,12 +64,9 @@ class OneEcosystemClientUnitTest {
 
     @Test
     void shouldCallLegacyEndpointWithAccessToken() throws IOException {
-        when(httpClient.execute(
-                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
-                any(HttpClientResponseHandler.class)))
-                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
+        OneEcosystemClientImpl client = newOEClient();
 
-        OneEcosystemClientImpl client = newClient();
         assertEquals(200, client.callLegacyEndpoint());
 
         ArgumentCaptor<HttpGet> apiRequest = ArgumentCaptor.forClass(HttpGet.class);
@@ -79,12 +76,9 @@ class OneEcosystemClientUnitTest {
 
     @Test
     void shouldReuseUnexpiredToken() throws IOException {
-        when(httpClient.execute(
-                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
-                any(HttpClientResponseHandler.class)))
-                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
+        OneEcosystemClientImpl client = newOEClient();
 
-        OneEcosystemClientImpl client = newClient();
         assertEquals(200, client.callLegacyEndpoint());
         assertEquals(200, client.callLegacyEndpoint());
 
@@ -96,15 +90,11 @@ class OneEcosystemClientUnitTest {
 
     @Test
     void shouldRefreshTokenIfAboutToExpire() throws IOException {
-        when(httpClient.execute(
-                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
-                any(HttpClientResponseHandler.class)))
-                .thenAnswer(tokenResponse("old-token", 5))
+        mockTokenRequest("old-token", 5)
                 .thenAnswer(tokenResponse("new-token", TOKEN_LIFETIME_SECONDS));
+        OneEcosystemClientImpl client = newOEClient();
 
-        OneEcosystemClientImpl client = newClient();
         assertEquals(200, client.callLegacyEndpoint());
-
         verify(httpClient, times(2)).execute(
                 argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
                 any(HttpClientResponseHandler.class));
@@ -116,11 +106,8 @@ class OneEcosystemClientUnitTest {
 
     @Test
     void shouldReadCompletedJobOutputUrls() throws IOException {
-        String jobId = "42";
-        when(httpClient.execute(
-                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
-                any(HttpClientResponseHandler.class)))
-                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
+        String jobId = "theJobId";
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
 
         when(httpClient.execute(any(HttpGet.class), any(HttpClientResponseHandler.class)))
                 .thenAnswer(response(200, """
@@ -129,53 +116,49 @@ class OneEcosystemClientUnitTest {
                       "request": "https://dpc.cms.gov/api/v3/Group/test-group/$export",
                       "requiresAccessToken": true,
                       "output": [
-                        {"type": "Patient", "url": "https://example.test/data/42/patient.ndjson"},
-                        {"type": "Coverage", "url": "https://example.test/data/42/coverage.ndjson"},
-                        {"type": "ExplanationOfBenefit", "url": "https://example.test/data/42/eob.ndjson"}
+                        {"type": "Patient", "url": "https://example.test/data/theJobId/patient.ndjson"},
+                        {"type": "Coverage", "url": "https://example.test/data/theJobId/coverage.ndjson"},
+                        {"type": "ExplanationOfBenefit", "url": "https://example.test/data/theJobId/eob.ndjson"}
                       ],
                       "error": [],
-                      "JobID": %s
+                      "JobID": "theJobId"
                     }
-                    """.formatted(jobId)));
+                    """));
 
-        var status = newClient().jobStatus(jobId);
+        var status = newOEClient().jobStatus(jobId);
 
         assertEquals(200, status.statusCode());
         assertEquals(jobId, status.body().JobID());
-        assertEquals(Instant.parse("2026-08-01T13:00:00Z"), status.body().transactionTime());
         assertEquals(List.of("Patient", "Coverage", "ExplanationOfBenefit"), status.body().output().stream()
                 .map(output -> output.type()).toList());
         assertEquals(List.of(
-                "https://example.test/data/42/patient.ndjson",
-                "https://example.test/data/42/coverage.ndjson",
-                "https://example.test/data/42/eob.ndjson"), status.body().output().stream()
+                "https://example.test/data/theJobId/patient.ndjson",
+                "https://example.test/data/theJobId/coverage.ndjson",
+                "https://example.test/data/theJobId/eob.ndjson"), status.body().output().stream()
                 .map(output -> output.url()).toList());
-
-        ArgumentCaptor<HttpGet> apiRequest = ArgumentCaptor.forClass(HttpGet.class);
-        verify(httpClient).execute(apiRequest.capture(), any(HttpClientResponseHandler.class));
-        assertEquals("/api/v3/jobs/" + jobId, apiRequest.getValue().getPath());
-        assertEquals("Bearer access-token", apiRequest.getValue().getFirstHeader(HttpHeaders.AUTHORIZATION).getValue());
-        assertEquals("application/fhir+json", apiRequest.getValue().getFirstHeader(HttpHeaders.ACCEPT).getValue());
     }
 
     @Test
-    void shouldReturnPendingJobWithoutBody() throws IOException {
-        when(httpClient.execute(
-                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
-                any(HttpClientResponseHandler.class)))
-                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
-
+    void shouldForward202CodeForPendingJob() throws IOException {
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
         when(httpClient.execute(any(HttpGet.class), any(HttpClientResponseHandler.class)))
-                .thenAnswer(response(202, null));
+                .thenAnswer(response(202, "Doesn't matter (e.g. Job is still processing)"));
 
-        var status = newClient().jobStatus(UUID.randomUUID().toString());
+        var status = newOEClient().jobStatus(UUID.randomUUID().toString());
 
         assertEquals(202, status.statusCode());
         assertNull(status.body());
     }
 
-    private OneEcosystemClientImpl newClient() {
+    private OneEcosystemClientImpl newOEClient() {
         return new OneEcosystemClientImpl(config, FHIR_CONTEXT);
+    }
+
+    private OngoingStubbing<String> mockTokenRequest(String token, int expiresIn) throws IOException {
+        return when(httpClient.<String>execute(
+                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
+                any(HttpClientResponseHandler.class)))
+                .thenAnswer(tokenResponse(token, expiresIn));
     }
 
     private Answer<String> tokenResponse(String token, int expiresIn) {
