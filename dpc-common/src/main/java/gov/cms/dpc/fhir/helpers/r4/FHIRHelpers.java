@@ -101,9 +101,10 @@ public class FHIRHelpers {
         if (resource == null) {
             throw new WebApplicationException("Unable to get resource.", Response.Status.INTERNAL_SERVER_ERROR);
         }
-        final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
+        final boolean created = Boolean.TRUE.equals(outcome.getCreated());
+        final Response.Status status = created ? Response.Status.CREATED : Response.Status.OK;
         Response.ResponseBuilder builder = Response.status(status).entity(resource);
-        if (outcome.getCreated() != null) {
+        if (created) {
             if (resource.getIdElement().getIdPart() == null) {
                 throw new WebApplicationException("Created resource has no ID.", Response.Status.INTERNAL_SERVER_ERROR);
             }

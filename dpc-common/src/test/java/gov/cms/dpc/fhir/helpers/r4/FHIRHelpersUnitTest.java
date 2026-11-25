@@ -116,6 +116,22 @@ class FHIRHelpersUnitTest {
     }
 
     @Test
+    void testHandleMethodOutcome_notCreated() {
+        MethodOutcome outcome = new MethodOutcome();
+        Practitioner practitioner = new Practitioner();
+        practitioner.getMeta().setLastUpdated(new Date());
+        outcome.setResource(practitioner);
+        outcome.setCreated(false);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertSame(practitioner, response.getEntity());
+        assertNull(response.getLocation());
+        assertNull(response.getLastModified());
+    }
+
+    @Test
     void createdPractitionerHasV3Location() {
         Practitioner practitioner = new Practitioner();
         String id = UUID.randomUUID().toString();
