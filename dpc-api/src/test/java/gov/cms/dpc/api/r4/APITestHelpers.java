@@ -3,6 +3,8 @@ package gov.cms.dpc.api.r4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.IOException;
@@ -40,7 +42,7 @@ public class APITestHelpers {
     }
 
     public static Practitioner createPractitionerResource(String npi, String orgId) {
-        return gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder.newBuilder()
+        return FHIRPractitionerBuilder.newBuilder()
                 .withNpi(npi)
                 .withOrgTag(orgId)
                 .withName("Test", "Practitioner")
@@ -49,7 +51,7 @@ public class APITestHelpers {
     }
 
     public static Patient createPatientResource(String mbi, String orgId) {
-        return gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder.newBuild()
+        return FHIRPatientBuilder.newBuild()
                 .withMbi(mbi)
                 .withBirthDate("1990-01-01")
                 .withName("Test", "Patient")
