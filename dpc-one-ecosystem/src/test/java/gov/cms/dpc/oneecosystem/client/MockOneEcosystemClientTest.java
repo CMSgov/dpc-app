@@ -26,7 +26,7 @@ class MockOneEcosystemClientTest {
     void testInvalidJobReturnsBackendError() {
         MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
-        var invalidJob = client.jobStatus(UUID.randomUUID());
+        var invalidJob = client.jobStatus(UUID.randomUUID().toString());
         assertEquals(400, invalidJob.statusCode());
     }
 
@@ -35,7 +35,7 @@ class MockOneEcosystemClientTest {
         MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
         OneEcosystemExportResponse response = client.export(request());
-        final UUID jobId = getJobIdFromResponse(response);
+        final String jobId = getJobIdFromResponse(response);
 
         assertEquals(202, response.statusCode());
         assertEquals(202, client.jobStatus(jobId).statusCode());
@@ -50,7 +50,7 @@ class MockOneEcosystemClientTest {
         MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
         OneEcosystemExportResponse response = client.export(request());
-        final UUID jobId = getJobIdFromResponse(response);
+        final String jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
 
@@ -74,7 +74,7 @@ class MockOneEcosystemClientTest {
         MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
         OneEcosystemExportResponse response = client.export(request());
-        final UUID jobId = getJobIdFromResponse(response);
+        final String jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
 
@@ -98,7 +98,7 @@ class MockOneEcosystemClientTest {
         MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
         OneEcosystemExportResponse response = client.export(request(List.of("Patient")));
-        final UUID jobId = getJobIdFromResponse(response);
+        final String jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
 
@@ -118,8 +118,8 @@ class MockOneEcosystemClientTest {
         assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-ExplanationOfBenefit.ndjson.gz")));
     }
 
-    private UUID getJobIdFromResponse(OneEcosystemExportResponse response) {
-        return UUID.fromString(response.contentLocation().substring(response.contentLocation().lastIndexOf('/') + 1));
+    private String getJobIdFromResponse(OneEcosystemExportResponse response) {
+        return response.contentLocation().substring(response.contentLocation().lastIndexOf('/') + 1);
     }
 
     private OneEcosystemExportRequest request() {
@@ -131,7 +131,7 @@ class MockOneEcosystemClientTest {
             List.of("ABC0123ABCD"),
             Instant.now(),
             resourceTypes,
-            "ExplanationOfBenefit?outcome=complete" // this means other resourceTypes are not _typeFilter'd
+            "https://example.com/api/v3/Group/1234/$export"
         );
     }
 }
