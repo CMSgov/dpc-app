@@ -185,13 +185,6 @@ class DataResourceUnitTest {
         assertEquals("bytes 0-1/" + length, response.getHeaderString(CONTENT_RANGE));
         assertEquals("2", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 
-        response = RESOURCE.target("/v3/Data/test.ndjson").request()
-            .header(RANGE, "bytes=0-0").get();
-        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus());
-        assertEquals(String.valueOf(randomString.charAt(0)), readResponse(response, false));
-        assertEquals("bytes 0-0/" + length, response.getHeaderString(CONTENT_RANGE));
-        assertEquals("1", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
-
         // Request 500 kb, with an offset
         int start = 30;
         int end = 500 * 1024 + start;
@@ -269,6 +262,31 @@ class DataResourceUnitTest {
         response = requestBuilder.get();
 
         assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
+    }
+
+    @ParameterizedTest
+    @MethodSource("downloadArgs")
+    void canDownloadSingleByteRange(boolean legacyExtension, Map<String, String> requestHeaders,
+                                    @TempDir Path directory) throws IOException {
+        final String content = "This is a test";
+        final Path path = directory.resolve(legacyExtension ? "test.ndjson.gz" : "test.ndjson");
+        Files.write(path, GzipUtil.compress(content));
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(
+            new FileManager.FilePointer("", Files.size(path), UUID.randomUUID(),
+                OffsetDateTime.now(ZoneOffset.UTC), path.toFile(), true)
+        );
+
+        Invocation.Builder requestBuilder = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=0-0");
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        Response response = requestBuilder.get();
+
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus());
+        assertEquals(content.substring(0, 1), readResponse(response, false));
+        assertEquals("bytes 0-0/" + content.length(), response.getHeaderString(CONTENT_RANGE));
+        assertEquals("1", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
     }
 
     @ParameterizedTest

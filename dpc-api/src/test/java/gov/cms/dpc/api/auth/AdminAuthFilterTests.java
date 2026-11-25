@@ -62,7 +62,7 @@ class AdminAuthFilterTests {
 
         this.filter.filter(request);
         ArgumentCaptor<DPCAuthCredentials> credentials = ArgumentCaptor.forClass(DPCAuthCredentials.class);
-        Mockito.verify(authenticator).authenticate(credentials.capture());
+        verify(authenticator).authenticate(credentials.capture());
         assertNull(credentials.getValue().getOrganizationId());
     }
 
