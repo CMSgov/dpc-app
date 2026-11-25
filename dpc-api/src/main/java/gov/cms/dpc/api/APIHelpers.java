@@ -97,6 +97,19 @@ public class APIHelpers {
         }
     }
 
+    public static void addOrganizationTag(org.hl7.fhir.r4.model.Resource resource, String organizationID) {
+        final org.hl7.fhir.r4.model.Coding orgTag = new org.hl7.fhir.r4.model.Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
+        final org.hl7.fhir.r4.model.Meta meta = resource.getMeta();
+        if (meta == null) {
+            final org.hl7.fhir.r4.model.Meta newMeta = new org.hl7.fhir.r4.model.Meta();
+            newMeta.addTag(orgTag);
+            resource.setMeta(newMeta);
+        } else {
+            meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
+            meta.addTag(orgTag);
+        }
+    }
+
     /**
      * Fetch the BFD database last update time. Use it as the transactionTime for a job.
      *
@@ -147,108 +160,90 @@ public class APIHelpers {
         return FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
 
-    public static class V3 {
-        private V3() {
-            // not used
-        }
-        public static void addOrganizationTag(org.hl7.fhir.r4.model.Resource resource, String organizationID) {
-            final org.hl7.fhir.r4.model.Coding orgTag = new org.hl7.fhir.r4.model.Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
-            final org.hl7.fhir.r4.model.Meta meta = resource.getMeta();
-            if (meta == null) {
-                final org.hl7.fhir.r4.model.Meta newMeta = new org.hl7.fhir.r4.model.Meta();
-                newMeta.addTag(orgTag);
-                resource.setMeta(newMeta);
-            } else {
-                meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
-                meta.addTag(orgTag);
-            }
+    public static Optional<String> getOrganizationNPI(OrganizationPrincipal organizationPrincipal) {
+        if (organizationPrincipal == null) {
+            return Optional.empty();
         }
 
-        public static Optional<String> getOrganizationNPI(OrganizationPrincipal organizationPrincipal) {
-            if (organizationPrincipal == null) {
-                return Optional.empty();
-            }
-
-            Organization organization = organizationPrincipal.getOrganization();
-            if (organization == null || !organization.hasIdentifier()) {
-                return Optional.empty();
-            }
-
-            return organization.getIdentifier().stream()
-                    .filter(id -> DPCIdentifierSystem.NPPES.getSystem().equalsIgnoreCase(id.getSystem()))
-                    .map(Identifier::getValue)
-                    .findFirst();
+        Organization organization = organizationPrincipal.getOrganization();
+        if (organization == null || !organization.hasIdentifier()) {
+            return Optional.empty();
         }
 
-        public static OffsetDateTime handleSinceQueryParam(String sinceParam) {
-            if (!StringUtils.isBlank(sinceParam)) {
-                try{
-                    OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                    if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
-                        throw new BadRequestException("'_since' query parameter cannot be a future date");
-                    }
-                    return sinceDate;
-                } catch (DateTimeParseException e) {
-                    throw new BadRequestException("_since parameter `"+e.getParsedString()+"` could not be parsed at index "+e.getErrorIndex());
+        return organization.getIdentifier().stream()
+                .filter(id -> DPCIdentifierSystem.NPPES.getSystem().equalsIgnoreCase(id.getSystem()))
+                .map(Identifier::getValue)
+                .findFirst();
+    }
+
+    public static OffsetDateTime handleSinceQueryParam(String sinceParam) {
+        if (!StringUtils.isBlank(sinceParam)) {
+            try{
+                OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
+                    throw new BadRequestException("'_since' query parameter cannot be a future date");
                 }
-            }
-            return null;
-        }
-
-        /**
-         * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
-         * by returning all valid resource types.
-         *
-         * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}s
-         * @return - A list of {@link DPCResourceType} to return for this request.
-         */
-        public static List<DPCResourceType> handleTypeQueryParam(String resourcesListParam) {
-            // If the query param is omitted, the FHIR spec states that all resources should be returned
-            if (resourcesListParam == null || resourcesListParam.isEmpty()) {
-                return JobQueueBatch.validResourceTypes;
-            }
-
-            final var resources = new ArrayList<DPCResourceType>();
-            for (String queryResource : resourcesListParam.split(",", -1)) {
-                final var foundResourceType = matchResourceType(queryResource);
-                if (foundResourceType.isEmpty()) {
-                    throw new BadRequestException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource));
-                }
-                resources.add(foundResourceType.get());
-            }
-            return resources;
-        }
-
-        /**
-         * Check the query parameters of the request. If not valid, throw a {@link BadRequestException}.
-         *
-         * @param outputFormat param to check
-         */
-        public static void checkExportRequest(String outputFormat, String headerPrefer) {
-            // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
-            if (!Strings.CI.equalsAny(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
-                throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
-            }
-            if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
-                throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
-            }
-            if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
-                throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
+                return sinceDate;
+            } catch (DateTimeParseException e) {
+                throw new BadRequestException("_since parameter `"+e.getParsedString()+"` could not be parsed at index "+e.getErrorIndex());
             }
         }
+        return null;
+    }
 
-        /**
-         * Convert a single resource type in a query param into a {@link DPCResourceType}.
-         *
-         * @param queryResourceType - The text from the query param
-         * @return If match is found a {@link DPCResourceType}
-         */
-        private static Optional<DPCResourceType> matchResourceType(String queryResourceType) {
-            final var canonical = queryResourceType.trim().toUpperCase();
-            // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-            return JobQueueBatch.validResourceTypes.stream()
-                    .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
-                    .findFirst();
+    /**
+     * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
+     * by returning all valid resource types.
+     *
+     * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}s
+     * @return - A list of {@link DPCResourceType} to return for this request.
+     */
+    public static List<DPCResourceType> handleTypeQueryParam(String resourcesListParam) {
+        // If the query param is omitted, the FHIR spec states that all resources should be returned
+        if (resourcesListParam == null || resourcesListParam.isEmpty()) {
+            return JobQueueBatch.validResourceTypes;
         }
+
+        final var resources = new ArrayList<DPCResourceType>();
+        for (String queryResource : resourcesListParam.split(",", -1)) {
+            final var foundResourceType = matchResourceType(queryResource);
+            if (foundResourceType.isEmpty()) {
+                throw new BadRequestException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource));
+            }
+            resources.add(foundResourceType.get());
+        }
+        return resources;
+    }
+
+    /**
+     * Check the query parameters of the request. If not valid, throw a {@link BadRequestException}.
+     *
+     * @param outputFormat param to check
+     */
+    public static void checkExportRequest(String outputFormat, String headerPrefer) {
+        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
+        if (!Strings.CI.equalsAny(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
+            throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
+        }
+        if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
+        }
+        if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
+        }
+    }
+
+    /**
+     * Convert a single resource type in a query param into a {@link DPCResourceType}.
+     *
+     * @param queryResourceType - The text from the query param
+     * @return If match is found a {@link DPCResourceType}
+     */
+    private static Optional<DPCResourceType> matchResourceType(String queryResourceType) {
+        final var canonical = queryResourceType.trim().toUpperCase();
+        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
+        return JobQueueBatch.validResourceTypes.stream()
+                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
+                .findFirst();
     }
 }

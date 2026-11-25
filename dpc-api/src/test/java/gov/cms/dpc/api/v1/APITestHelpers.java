@@ -1,4 +1,4 @@
-package gov.cms.dpc.api;
+package gov.cms.dpc.api.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -192,7 +192,7 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+    public static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
         // Truncate attribution database
         truncateDatabase();
@@ -218,7 +218,7 @@ public class APITestHelpers {
         }
     }
 
-    static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+    public static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
@@ -370,83 +370,5 @@ public class APITestHelpers {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", provenance)
                 .execute();
-    }
-
-    public static class V3 {
-        public static org.hl7.fhir.r4.model.Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds) {
-            final org.hl7.fhir.r4.model.CodeableConcept reasonConcept = new org.hl7.fhir.r4.model.CodeableConcept()
-                    .addCoding(new org.hl7.fhir.r4.model.Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT"));
-
-            final org.hl7.fhir.r4.model.CodeableConcept roleConcept = new org.hl7.fhir.r4.model.CodeableConcept()
-                    .addCoding(new org.hl7.fhir.r4.model.Coding().setSystem("http://terminology.hl7.org/CodeSystem/v3-RoleClass").setCode("AGNT"));
-
-            final org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent component =
-                    new org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent()
-                            .addRole(roleConcept)
-                            .setWho(new org.hl7.fhir.r4.model.Reference(new org.hl7.fhir.r4.model.IdType("Organization", orgId)))
-                            .setOnBehalfOf(new org.hl7.fhir.r4.model.Reference(practitionerId));
-
-            final org.hl7.fhir.r4.model.Provenance provenance = new org.hl7.fhir.r4.model.Provenance()
-                    .addReason(reasonConcept)
-                    .addAgent(component);
-            provenance.setRecorded(new java.util.Date());
-
-            patientIds.forEach(patientId -> provenance.addTarget(new org.hl7.fhir.r4.model.Reference(patientId)));
-            return provenance;
-        }
-
-        public static org.hl7.fhir.r4.model.Patient createPatientWithMbi(String mbi) {
-            org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
-            return patient;
-        }
-
-        public static org.hl7.fhir.r4.model.Practitioner createPractitionerResource(String npi, String orgId) {
-            return gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder.newBuilder()
-                    .withNpi(npi)
-                    .withOrgTag(orgId)
-                    .withName("Test", "Practitioner")
-                    .withId(UUID.randomUUID())
-                    .build();
-        }
-
-        public static org.hl7.fhir.r4.model.Patient createPatientResource(String mbi, String orgId) {
-            return gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder.newBuild()
-                    .withMbi(mbi)
-                    .withBirthDate("1990-01-01")
-                    .withName("Test", "Patient")
-                    .withGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.OTHER)
-                    .managedBy(orgId)
-                    .withId(UUID.randomUUID())
-                    .build();
-        }
-
-        public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
-            try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
-                final org.hl7.fhir.r4.model.Parameters providerParameters = (org.hl7.fhir.r4.model.Parameters) parser.parseResource(inputStream);
-
-                client
-                        .operation()
-                        .onType(org.hl7.fhir.r4.model.Practitioner.class)
-                        .named("submit")
-                        .withParameters(providerParameters)
-                        .encodedJson()
-                        .execute();
-            }
-        }
-
-        public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
-            try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
-                final org.hl7.fhir.r4.model.Parameters patientParameters = (org.hl7.fhir.r4.model.Parameters) parser.parseResource(inputStream);
-
-                client
-                        .operation()
-                        .onType(org.hl7.fhir.r4.model.Patient.class)
-                        .named("submit")
-                        .withParameters(patientParameters)
-                        .encodedJson()
-                        .execute();
-            }
-        }
     }
 }

@@ -24,9 +24,7 @@ public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
     private final FhirContext r4Ctx;
 
     @Inject
-    public ProvenanceResourceFactoryProvider(Injector injector,
-                                             @Named("stu3") FhirContext stu3Ctx,
-                                             @Named("r4") FhirContext r4Ctx) {
+    public ProvenanceResourceFactoryProvider(Injector injector, @Named("stu3") FhirContext stu3Ctx, @Named("r4") FhirContext r4Ctx) {
         this.injector = injector;
         this.stu3Ctx = stu3Ctx;
         this.r4Ctx = r4Ctx;

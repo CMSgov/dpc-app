@@ -5,9 +5,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -262,7 +262,7 @@ public class GroupResourceUnitTest {
         when(attributionClient.getRoster(UUID.fromString(groupId))).thenReturn(group);
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.V3.createPatientWithMbi("9S79A00AA00")));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.createPatientWithMbi("9S79A00AA00")));
         when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         when(oneEcosystemClient.export(any())).thenReturn(
@@ -305,7 +305,7 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.V3.createPatientWithMbi("9S79A00AA00")));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.createPatientWithMbi("9S79A00AA00")));
         when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -355,7 +355,7 @@ public class GroupResourceUnitTest {
 
         when(attributionClient.getRoster(any(UUID.class))).thenReturn(fakeGroup);
 
-        Patient fakePatient = APITestHelpers.V3.createPatientWithMbi("2S51C00AA00");
+        Patient fakePatient = APITestHelpers.createPatientWithMbi("2S51C00AA00");
         Bundle fakeBundle = new Bundle();
         fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
         when(attributionClient.getAttributedPatients(any(UUID.class), eq(true))).thenReturn(fakeBundle);

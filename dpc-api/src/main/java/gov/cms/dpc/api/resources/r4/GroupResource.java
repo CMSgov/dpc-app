@@ -48,7 +48,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APIHelpers.V3.*;
+import static gov.cms.dpc.api.APIHelpers.*;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
