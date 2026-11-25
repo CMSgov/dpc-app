@@ -66,7 +66,7 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
     public static String ORGANIZATION_NPI = "1111111112";
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String CONFIG_PATH = "src/test/resources/test.application.yml";
 
     private APITestHelpers() {
         // Not used
@@ -200,9 +200,9 @@ public class APITestHelpers {
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", CONFIG_PATH);
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "migrate", configPath);
+        application.getApplication().run("db", "migrate", CONFIG_PATH);
 
     }
 
