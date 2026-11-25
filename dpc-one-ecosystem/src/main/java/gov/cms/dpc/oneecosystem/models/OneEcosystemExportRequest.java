@@ -8,7 +8,7 @@ public record OneEcosystemExportRequest(
     List<String> mbis,
     Instant since,
     List<String> resourceTypes,
-    String sourceQuery
+    String sourceQuery // the request that triggered the export
 ) {
     public OneEcosystemExportRequest {
         mbis = List.copyOf(mbis);

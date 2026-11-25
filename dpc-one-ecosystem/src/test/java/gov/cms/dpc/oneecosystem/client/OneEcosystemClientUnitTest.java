@@ -2,7 +2,10 @@ package gov.cms.dpc.oneecosystem.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.jackson.Jackson;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -23,11 +26,15 @@ import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -36,6 +43,10 @@ class OneEcosystemClientUnitTest {
 
     private static final int TOKEN_LIFETIME_SECONDS = 3600;
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
+    private static final OneEcosystemExportRequest EXPORT_REQUEST = new OneEcosystemExportRequest(
+            List.of("123", "234", "345"), Instant.EPOCH,
+            List.of("Patient", "ExplanationOfBenefit", "Coverage"),
+            "https://example.test/api/v3/Group/dummyGroupId/$export");
     private static OneEcosystemClientConfiguration config;
 
     private CloseableHttpClient httpClient;
@@ -105,6 +116,46 @@ class OneEcosystemClientUnitTest {
     }
 
     @Test
+    void shouldSendRequiredParamsForExport() throws IOException, URISyntaxException {
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
+        var client = newOEClient();
+        ArgumentCaptor<HttpPost> apiRequest = ArgumentCaptor.forClass(HttpPost.class);
+        when(httpClient.execute(apiRequest.capture(), any(HttpClientResponseHandler.class)))
+                .thenAnswer(response(202, null));
+
+        client.export(EXPORT_REQUEST);
+
+        HttpPost post = apiRequest.getValue();
+        assertEquals(config.apiBaseUri().resolve("api/v3/$shared-export"), post.getUri());
+        assertEquals("Bearer access-token", post.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue());
+
+        var mapper = Jackson.newObjectMapper();
+        var body = mapper.readTree(post.getEntity().getContent());
+        assertEquals(EXPORT_REQUEST.sourceQuery(), body.path("source_query").asText());
+
+        var query = body.path("queries").get(0);
+        assertEquals(mapper.valueToTree(EXPORT_REQUEST.mbis()), query.path("mbis"));
+        assertEquals(mapper.valueToTree(EXPORT_REQUEST.resourceTypes()), query.path("resource_types"));
+
+        var filterNames = new ArrayList<String>();
+        query.path("filters").forEach(filter -> filterNames.add(filter.path("name").asText()));
+        assertTrue(filterNames.containsAll(List.of("_since", "_typeFilter")));
+    }
+
+    @Test
+    void shouldReturnAcceptedExportResponse() throws IOException {
+        mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
+        var client = newOEClient();
+        String contentLocation = "https://example.test/api/v3/jobs/1234asdf";
+        when(httpClient.execute(any(HttpPost.class), any(HttpClientResponseHandler.class)))
+                .thenAnswer(response(202, null, contentLocation));
+
+        var result = client.export(EXPORT_REQUEST);
+
+        assertEquals(new OneEcosystemExportResponse(202, contentLocation), result);
+    }
+
+    @Test
     void shouldReadCompletedJobOutputUrls() throws IOException {
         String jobId = "theJobId";
         mockTokenRequest("access-token", TOKEN_LIFETIME_SECONDS);
@@ -166,8 +217,15 @@ class OneEcosystemClientUnitTest {
     }
 
     private <T> Answer<T> response(int status, String body) {
+        return response(status, body, null);
+    }
+
+    private <T> Answer<T> response(int status, String body, String contentLocation) {
         return invocation -> {
             try (var response = new BasicClassicHttpResponse(status)) {
+                if (contentLocation != null) {
+                    response.setHeader(HttpHeaders.CONTENT_LOCATION, contentLocation);
+                }
                 if (body != null) {
                     response.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
                 }
