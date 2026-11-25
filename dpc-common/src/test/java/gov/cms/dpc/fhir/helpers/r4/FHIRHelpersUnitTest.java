@@ -1,0 +1,171 @@
+package gov.cms.dpc.fhir.helpers.r4;
+
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+class FHIRHelpersUnitTest {
+
+    static final UUID ORG_ID = UUID.randomUUID();
+    static final String ORG_NPI = NPIUtil.generateNPI();
+    static final String MACAROON = "macaroon";
+    static final String ADMIN_URL = "admin.url";
+
+    @Test
+    void testRegisterOrganization() throws IOException {
+        String organizationId = ORG_ID.toString();
+        IParser parser = mock(IParser.class);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(new Organization());
+        when(parser.parseResource(any(InputStream.class))).thenReturn(bundle);
+
+        IGenericClient client = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
+        IOperationUntypedWithInput<Organization> submitOp = mock(IOperationUntypedWithInput.class);
+        when(client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(any(Parameters.class))
+                .returnResourceType(Organization.class)
+        ).thenReturn(submitOp);
+        when(submitOp.encodedJson()).thenReturn(submitOp);
+
+        CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+        try (MockedStatic<HttpClients> mockedHttpClients = mockStatic(HttpClients.class)) {
+            mockedHttpClients.when(HttpClients::createDefault).thenReturn(httpClient);
+            CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class, RETURNS_DEEP_STUBS);
+            when(httpResponse.getCode()).thenReturn(HttpStatus.SC_OK);
+            when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
+            HttpEntity httpEntity = mock(HttpEntity.class);
+            InputStream inputStream = IOUtils.toInputStream(MACAROON, "UTF-8");
+            when(httpEntity.getContent()).thenReturn(inputStream);
+            when(httpResponse.getEntity()).thenReturn(httpEntity);
+
+            String response = assertDoesNotThrow(() ->
+                    FHIRHelpers.registerOrganization(client, parser, organizationId, ORG_NPI, ADMIN_URL));
+            assertEquals(MACAROON, response);
+
+            // Token generation error
+            when(httpResponse.getCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
+            when(httpResponse.getReasonPhrase()).thenReturn("Bad request");
+            IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
+                    FHIRHelpers.registerOrganization(client, parser, organizationId, ORG_NPI, ADMIN_URL));
+            assertEquals("Unable to generate token: " + httpResponse.getReasonPhrase(), stateException.getMessage());
+        }
+    }
+
+    @Test
+    void testHandleMethodOutcome_nullResource() {
+        MethodOutcome outcome = new MethodOutcome();
+        WebApplicationException exception = assertThrows(WebApplicationException.class, () ->
+                FHIRHelpers.handleMethodOutcome(outcome));
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
+        assertEquals("Unable to get resource.", exception.getMessage());
+    }
+
+    @Test
+    void testHandleMethodOutcome_created() {
+        MethodOutcome outcome = new MethodOutcome();
+        Organization organization = buildOrganization();
+        outcome.setResource(organization);
+        outcome.setCreated(true);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(organization, response.getEntity());
+    }
+
+    @Test
+    void testHandleMethodOutcome_ok() {
+        MethodOutcome outcome = new MethodOutcome();
+        Organization organization = buildOrganization();
+        outcome.setResource(organization);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(organization, response.getEntity());
+    }
+
+    @Test
+    void testHandleMethodOutcome_notCreated() {
+        MethodOutcome outcome = new MethodOutcome();
+        Practitioner practitioner = new Practitioner();
+        practitioner.getMeta().setLastUpdated(new Date());
+        outcome.setResource(practitioner);
+        outcome.setCreated(false);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertSame(practitioner, response.getEntity());
+        assertNull(response.getLocation());
+        assertNull(response.getLastModified());
+    }
+
+    @Test
+    void createdPractitionerHasV3Location() {
+        Practitioner practitioner = new Practitioner();
+        String id = UUID.randomUUID().toString();
+        practitioner.setId(id);
+        practitioner.getMeta().setLastUpdated(new Date());
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setResource(practitioner);
+        outcome.setCreated(true);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+
+        assertEquals(201, response.getStatus());
+        assertSame(practitioner, response.getEntity());
+        assertEquals("v3/Practitioner/" + id, response.getLocation().toString());
+        assertNotNull(response.getLastModified());
+    }
+
+    @Test
+    void missingIdOnCreatedResourceIsAnError() {
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setResource(new Practitioner());
+        outcome.setCreated(true);
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class,
+                () -> FHIRHelpers.handleMethodOutcome(outcome));
+        assertEquals(500, exception.getResponse().getStatus());
+    }
+
+    private Organization buildOrganization() {
+        Organization organization = new Organization();
+        organization.setId(ORG_ID.toString());
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(ORG_NPI);
+        organization.setIdentifier(List.of(identifier));
+        return organization;
+    }
+}

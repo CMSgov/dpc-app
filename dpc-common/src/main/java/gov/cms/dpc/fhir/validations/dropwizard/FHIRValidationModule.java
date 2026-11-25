@@ -12,8 +12,8 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
-import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import gov.cms.dpc.fhir.validations.ProfileValidator;
+import gov.cms.dpc.fhir.validations.r4.DPCProfileSupport;
+import gov.cms.dpc.fhir.validations.r4.ProfileValidator;
 import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;
 import io.dropwizard.jersey.validation.Validators;
 import jakarta.inject.Singleton;
@@ -52,11 +52,13 @@ public class FHIRValidationModule extends AbstractModule {
         // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
         TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {};
         Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
+        constraintBinder.addBinding().to(gov.cms.dpc.fhir.validations.v1.ProfileValidator.class);
         constraintBinder.addBinding().to(ProfileValidator.class);
 
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
 
+        bind(gov.cms.dpc.fhir.validations.v1.DPCProfileSupport.class).in(Scopes.SINGLETON);
         bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
     }
 
@@ -78,8 +80,9 @@ public class FHIRValidationModule extends AbstractModule {
             .buildValidatorFactory();
     }
 
+    // TODO: Delete when we remove v1
     @Provides
-    ValidationSupportChain provideSupportChain(DPCProfileSupport dpcModule) {
+    ValidationSupportChain provideSupportChain(gov.cms.dpc.fhir.validations.v1.DPCProfileSupport dpcModule) {
         FhirContext ctx = FhirContext.forDstu3();
         return new ValidationSupportChain(
                 dpcModule,
@@ -87,6 +90,7 @@ public class FHIRValidationModule extends AbstractModule {
                 new InMemoryTerminologyServerValidationSupport(ctx));
     }
 
+    // TODO: Delete when we remove v1
     @Provides
     @Singleton
     public FhirValidator provideFhirValidator(@Named("stu3") FhirContext ctx,
@@ -98,6 +102,25 @@ public class FHIRValidationModule extends AbstractModule {
         primeValidator(fhirValidator);
 
         return fhirValidator;
+    }
+
+    @Provides
+    @Named("r4")
+    ValidationSupportChain provideR4SupportChain(@Named("r4") FhirContext context, DPCProfileSupport profiles) {
+        return new ValidationSupportChain(
+                profiles,
+                new DefaultProfileValidationSupport(context),
+                new InMemoryTerminologyServerValidationSupport(context));
+    }
+
+    @Provides
+    @Singleton
+    @Named("r4")
+    FhirValidator provideR4FhirValidator(@Named("r4") FhirContext context,
+                                         @Named("r4") ValidationSupportChain supportChain) {
+        final FhirValidator validator = context.newValidator();
+        validator.registerValidatorModule(new FhirInstanceValidator(supportChain));
+        return validator;
     }
 
     /**

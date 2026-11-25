@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.resources.r4;
 
-import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.r4.APITestHelpers;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;

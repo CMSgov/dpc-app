@@ -18,44 +18,45 @@
         "path": "Provenance"
       },
       {
-        "id": "Provenance.target",
-        "path": "Provenance.target",
-        "min": 0
-      },
-      {
         "id": "Provenance.reason",
         "path": "Provenance.reason",
         "definition": "Must have attribution reason",
+        "min": 1,
         "slicing": {
           "discriminator": [
             {
               "type": "value",
-              "path": "system"
+              "path": "coding.system"
             },
             {
               "type": "value",
-              "path": "code"
+              "path": "coding.code"
             }
           ],
           "rules": "open"
         }
       },
       {
-        "id": "Provenance.reason",
+        "id": "Provenance.reason:provenance-reason",
         "path": "Provenance.reason",
         "sliceName": "provenance-reason",
         "min": 1,
         "max": "1"
       },
       {
-        "id": "Provenance.reason[x]:system",
-        "path": "Provenance.reason.system",
+        "id": "Provenance.reason:provenance-reason.coding",
+        "path": "Provenance.reason.coding",
+        "min": 1
+      },
+      {
+        "id": "Provenance.reason:provenance-reason.coding.system",
+        "path": "Provenance.reason.coding.system",
         "min": 1,
         "fixedUri": "http://hl7.org/fhir/v3/ActReason"
       },
       {
-        "id": "Provenance.reason[x]:code",
-        "path": "Provenance.reason.code",
+        "id": "Provenance.reason:provenance-reason.coding.code",
+        "path": "Provenance.reason.coding.code",
         "min": 1,
         "fixedCode": "TREAT"
       },
@@ -74,12 +75,14 @@
         }
       },
       {
+        "id": "Provenance.agent:performer",
         "path": "Provenance.agent",
         "sliceName": "performer",
         "min": 1,
         "max": "1"
       },
       {
+        "id": "Provenance.agent:performer.role",
         "path": "Provenance.agent.role",
         "min": 1,
         "patternCodeableConcept": {
@@ -92,8 +95,8 @@
         }
       },
       {
-        "id": "Provenance.agent.whoReference",
-        "path": "Provenance.agent.whoReference",
+        "id": "Provenance.agent:performer.who",
+        "path": "Provenance.agent.who",
         "min": 1,
         "type": [
           {
@@ -103,8 +106,8 @@
         ]
       },
       {
-        "id": "Provenance.agent.onBehalfOfReference",
-        "path": "Provenance.agent.onBehalfOfReference",
+        "id": "Provenance.agent:performer.onBehalfOf",
+        "path": "Provenance.agent.onBehalfOf",
         "min": 1,
         "type": [
           {

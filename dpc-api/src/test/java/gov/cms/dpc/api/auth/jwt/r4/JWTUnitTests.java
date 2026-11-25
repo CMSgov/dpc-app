@@ -3,19 +3,19 @@ package gov.cms.dpc.api.auth.jwt.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
 import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
-import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.macaroonauth.stu3.MacaroonsAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.r4.TokenResource;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.stu3.DPCValidationErrorMessage;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.r4.DPCValidationErrorMessage;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -741,12 +741,13 @@ class JWTUnitTests {
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
-        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client),
+                mock(gov.cms.dpc.api.auth.macaroonauth.r4.MacaroonsAuthenticator.class), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v3");
 
-        final FhirContext ctx = FhirContext.forDstu3();
+        final FhirContext ctx = FhirContext.forR4();
 
         return APITestHelpers.buildResourceExtension(ctx, List.of(tokenResource), List.of(dynamicFeature), false);
     }

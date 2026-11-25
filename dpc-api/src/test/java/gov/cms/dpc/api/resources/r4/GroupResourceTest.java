@@ -1,13 +1,12 @@
 package gov.cms.dpc.api.resources.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.r4.AbstractSecureApplicationTest;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.r4.model.Group;
@@ -23,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
-    private final FhirContext ctx = FhirContext.forR4();
     private final IdType rosterId = new IdType("Group", UUID.randomUUID().toString());
     private final Parameters memberParameters = new Parameters()
             .addParameter(new Parameters.ParametersParameterComponent().setResource(new Group()));
@@ -89,7 +87,6 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     private IGenericClient buildV3Client() {
-        final String v3BaseURL = getBaseURL().replaceFirst("/v1$", "/v3");
-        return APIAuthHelpers.buildAuthenticatedClient(ctx, v3BaseURL, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
     }
 }

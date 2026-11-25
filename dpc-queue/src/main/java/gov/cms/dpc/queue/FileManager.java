@@ -34,14 +34,30 @@ public class FileManager {
         this.jobQueue = jobQueue;
     }
 
+    // TODO: Remove once we get rid of /v1
+    // v1 files are named *.ndjson.gz and are compressed
     public FilePointer getFile(UUID organizationID, String fileID) {
+        return getFile(organizationID, fileID, false);
+    }
+
+    // v3 files are named *.ndjson and are also compressed, despite the name.  If this is ever fixed we can get rid
+    // of this method, or atleast simplify it
+    public FilePointer getV3File(UUID organizationID, String fileID) {
+        return getFile(organizationID, fileID, true);
+    }
+
+    private FilePointer getFile(UUID organizationID, String fileID, boolean ndjsonIsCompressed) {
         final JobQueueBatchFile batchFile = this.jobQueue.getJobBatchFile(organizationID, fileID)
                 .orElseThrow(() -> new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND));
 
-        return getFile(batchFile);
+        return getFile(batchFile, ndjsonIsCompressed);
     }
 
     public FilePointer getFile(JobQueueBatchFile batchFile) {
+        return getFile(batchFile, false);
+    }
+
+    private FilePointer getFile(JobQueueBatchFile batchFile, boolean ndjsonIsCompressed) {
         final JobQueueBatch jobQueueBatch = this.jobQueue.getBatch(batchFile.getBatchID())
             .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
 
@@ -56,7 +72,7 @@ public class FileManager {
             compressed = true;
         } else if(Files.exists(nonCompressedPath)) {
             path = nonCompressedPath;
-            compressed = false;
+            compressed = ndjsonIsCompressed;
         } else {
             logger.error("Unable to find compressed or non-compressed file: {}", batchFile.getFileName());
             throw new WebApplicationException("Cannot find file", Response.Status.INTERNAL_SERVER_ERROR);

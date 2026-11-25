@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v3/Key")
-public class KeyResource extends AbstractKeyResource {
+public class KeyResource extends AbstractKeyResource<OrganizationPrincipal> {
 
     public static final String SNIPPET = "This is the snippet used to verify a key pair in DPC.";
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);

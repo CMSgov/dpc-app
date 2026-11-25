@@ -8,7 +8,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
@@ -20,7 +20,6 @@ import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.MDCConstants;
-import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
@@ -39,6 +38,7 @@ import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -66,7 +66,7 @@ import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v3/Token")
-public class TokenResource extends AbstractTokenResource {
+public class TokenResource extends AbstractTokenResource<OrganizationPrincipal> {
 
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     // This will be removed as part of DPC-747
@@ -87,7 +87,7 @@ public class TokenResource extends AbstractTokenResource {
                          TokenPolicy policy,
                          JwtKeyLocator locator,
                          IJTICache cache,
-                         @APIV1 String publicURL) {
+                         @Named("v3URL") String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;

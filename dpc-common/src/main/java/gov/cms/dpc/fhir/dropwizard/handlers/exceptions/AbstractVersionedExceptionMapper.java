@@ -27,7 +27,8 @@ public abstract class AbstractVersionedExceptionMapper<E extends Throwable> impl
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
-        boolean r4 = path.equals("r4") || path.startsWith("r4/");
+        boolean r4 = path.equals("r4") || path.startsWith("r4/")
+                || path.equals("v3") || path.startsWith("v3/");
         ResourceInfo resourceInfo = info;
         if (info.getResourceClass() == null && info.getResourceMethod() == null
                 && (r4 || path.equals("v1") || path.startsWith("v1/"))) {

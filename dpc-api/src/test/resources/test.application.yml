@@ -39,11 +39,12 @@ server:
             application: ${APPLICATION:-"dpc-api"}
         filterFactories:
           - type: token-filter-factory
-  # Turn off gzip for the /Data endpoint only
+  # Data endpoints handle gzip and byte ranges themselves.
   gzip:
     enabled: true
     excludedPaths:
       - "/v1/Data/*"
+      - "/v3/Data/*"
 
 logging:
   level: INFO
@@ -70,6 +71,7 @@ logging:
       discardingThreshold: 0
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
+dataFileSizeCacheMaxEntries: ${DATA_FILE_SIZE_CACHE_MAX_ENTRIES:-10000}
 
 # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 publicURL: ${PUBLIC_URL:-"http://localhost:3002"}

@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.r4.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.r4.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -40,7 +40,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
     private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1");
 
-    private IpAddressResourceTest() throws IOException, URISyntaxException {
+    IpAddressResourceTest() throws IOException, URISyntaxException {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 
@@ -213,8 +213,4 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL().replaceFirst("/v1$", "/v3");
-    }
 }

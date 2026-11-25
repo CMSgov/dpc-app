@@ -7,6 +7,9 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 
 import java.io.*;
@@ -48,6 +51,7 @@ class FileManagerUnitTest {
 			mockedFiles.when(() -> Files.exists(path)).thenReturn(true);
 			FileManager.FilePointer filePointer = fileManager.getFile(organizationID, fileId);
 			assertEquals(fileName + ".ndjson.gz", filePointer.getFile().getName());
+			assertTrue(filePointer.isCompressed());
 		}
 	}
 
@@ -71,6 +75,35 @@ class FileManagerUnitTest {
 			mockedFiles.when(() -> Files.exists(path)).thenReturn(true);
 			FileManager.FilePointer filePointer = fileManager.getFile(organizationID, fileId);
 			assertEquals(fileName + ".ndjson", filePointer.getFile().getName());
+			assertFalse(filePointer.isCompressed());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {".ndjson", ".ndjson.gz"})
+	void r4ReadsCompressedFilesWithEitherExtension(String extension, @TempDir Path directory) throws IOException {
+		String fileName = "fileName";
+		String content = "test data";
+		Path path = directory.resolve(fileName + extension);
+		Files.write(path, GzipUtil.compress(content));
+		JobQueueBatch batch = mock(JobQueueBatch.class);
+		JobQueueBatchFile batchFile = mock(JobQueueBatchFile.class);
+		when(queue.getJobBatchFile(organizationID, fileId)).thenReturn(Optional.of(batchFile));
+		when(queue.getBatch(batchID)).thenReturn(Optional.of(batch));
+		when(batchFile.getBatchID()).thenReturn(batchID);
+		when(batchFile.getFileName()).thenReturn(fileName);
+		when(batchFile.getChecksum()).thenReturn(new byte[] {1, 2, 3});
+		when(batch.getStartTime()).thenReturn(Optional.of(OffsetDateTime.now()));
+
+		FileManager fileManager = new FileManager(directory.toString(), queue);
+		FileManager.FilePointer filePointer = fileManager.getV3File(organizationID, fileId);
+		assertEquals(path.toFile(), filePointer.getFile());
+		assertTrue(filePointer.isCompressed());
+		try (InputStream stream = filePointer.getUncompressedInputStream()) {
+			assertEquals(content, new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+		}
+		if (extension.equals(".ndjson")) {
+			assertFalse(fileManager.getFile(organizationID, fileId).isCompressed());
 		}
 	}
 
@@ -80,6 +113,9 @@ class FileManagerUnitTest {
 		FileManager fileManager = new FileManager(exportPath, queue);
 		WebApplicationException e = assertThrows(WebApplicationException.class, () -> fileManager.getFile(organizationID, fileId));
 		assertEquals(Response.Status.NOT_FOUND.getStatusCode(), e.getResponse().getStatus());
+		WebApplicationException r4Exception = assertThrows(WebApplicationException.class,
+			() -> fileManager.getV3File(organizationID, fileId));
+		assertEquals(Response.Status.NOT_FOUND.getStatusCode(), r4Exception.getResponse().getStatus());
 	}
 
 	@Test

@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
@@ -70,7 +71,7 @@ class FHIRSubmissionTest {
     private static final IReadExecutable mockExecutable = mock(IReadExecutable.class);
     private static final ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
 
-    private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
+    private static final AuthFilter<DPCAuthCredentials, Principal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
 
     // Test data

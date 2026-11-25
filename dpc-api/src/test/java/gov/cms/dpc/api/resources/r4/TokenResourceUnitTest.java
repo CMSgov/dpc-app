@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.resources.r4;
 
 import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -16,7 +16,7 @@ import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

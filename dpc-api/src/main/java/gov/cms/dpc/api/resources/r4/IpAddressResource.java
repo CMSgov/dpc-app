@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Api(tags = {"Auth", "IpAddress"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v3/IpAddress")
-public class IpAddressResource extends AbstractIpAddressResource {
+public class IpAddressResource extends AbstractIpAddressResource<OrganizationPrincipal> {
     private static final Logger logger = LoggerFactory.getLogger(IpAddressResource.class);
     static final int MAX_IPS = 8;
     private final IpAddressDAO dao;

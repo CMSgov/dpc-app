@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -25,6 +26,7 @@ import java.security.SecureRandom;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -59,7 +61,9 @@ class AdminAuthFilterTests {
         Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn(String.format("Bearer %s", macaroonValue));
 
         this.filter.filter(request);
-        Mockito.verify(authenticator, times(1)).authenticate(Mockito.any());
+        ArgumentCaptor<DPCAuthCredentials> credentials = ArgumentCaptor.forClass(DPCAuthCredentials.class);
+        verify(authenticator).authenticate(credentials.capture());
+        assertNull(credentials.getValue().getOrganizationId());
     }
 
     @Test

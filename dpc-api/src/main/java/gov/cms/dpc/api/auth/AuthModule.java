@@ -7,7 +7,7 @@ import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
-import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.macaroonauth.r4.MacaroonsAuthenticator;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
@@ -18,6 +18,8 @@ import io.jsonwebtoken.LocatorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
+
+import java.security.Principal;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
@@ -40,13 +42,15 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         if (configuration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
             binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
-            binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
+            binder.bind(new TypeLiteral<Authenticator<DPCAuthCredentials, Principal>>() {
+                }).to(StaticAuthenticator.class);
 
         } else {
             binder.bind(DPCUnauthorizedHandler.class);
             binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
             binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
-            binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
+            binder.bind(authenticatorTypeLiteral).to(gov.cms.dpc.api.auth.macaroonauth.stu3.MacaroonsAuthenticator.class);
+            binder.bind(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(LocatorAdapter.class).to(JwtKeyLocator.class);

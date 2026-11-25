@@ -102,7 +102,7 @@ public class PatientResource {
         List<PatientEntity> patientEntities = pageResult.getResults();
 
         List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
-        return this.pagingService.handlePagingLinks(patients, count, pageOffset, "/r4/Patient", pageResult.hasNext());
+        return this.pagingService.handlePagingLinks(patients, count, pageOffset, "/r4/Patient", patientMBI, pageResult.hasNext());
     }
 
     @GET

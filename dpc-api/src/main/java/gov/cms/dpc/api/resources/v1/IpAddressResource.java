@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Api(tags = {"Auth", "IpAddress"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/IpAddress")
-public class IpAddressResource extends AbstractIpAddressResource {
+public class IpAddressResource extends AbstractIpAddressResource<OrganizationPrincipal> {
     private static final Logger logger = LoggerFactory.getLogger(IpAddressResource.class);
     static final int MAX_IPS = 8;
     private final IpAddressDAO dao;

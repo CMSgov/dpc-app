@@ -1,6 +1,6 @@
 package gov.cms.dpc.fhir.annotations;
 
-import gov.cms.dpc.fhir.validations.ProfileValidator;
+import gov.cms.dpc.fhir.validations.r4.ProfileValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -13,11 +13,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Any resource using @Profiled must have a corresponding profile URI in resourceProfileMap in {@link ProfileValidator}
+ * Any resource using @Profiled must have a corresponding profile in
+ * {@link gov.cms.dpc.fhir.validations.v1.ProfileValidator} or {@link ProfileValidator}.
  */
 @Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, TYPE_USE})
 @Retention(RUNTIME)
-@Constraint(validatedBy = ProfileValidator.class)
+@Constraint(validatedBy = {gov.cms.dpc.fhir.validations.v1.ProfileValidator.class, ProfileValidator.class})
 @Documented
 @Repeatable(Profiled.List.class)
 public @interface Profiled {
