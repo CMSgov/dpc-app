@@ -4,7 +4,6 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Api(tags = {"Bulk Data", "Job"}, authorizations = @Authorization(value = "access_token"))
-public class JobResource extends AbstractJobResource {
+public class JobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
     private static final String JOB_NOT_FOUND = "Could not find job";
@@ -53,7 +52,6 @@ public class JobResource extends AbstractJobResource {
         this.baseURL = baseURL;
     }
 
-    @Override
     @Path("/{jobID}")
     @GET
     @Timed
